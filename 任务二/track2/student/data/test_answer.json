@@ -1,12 +1,502 @@
 [
   {
-    "user_id": "U_XXX",
-    "movie_id": "M_XXX",
+    "user_id": "U_076bdd22",
+    "movie_id": "M_c463fbb9",
+    "rating": 5
+  },
+  {
+    "user_id": "U_076bdd22",
+    "movie_id": "M_beb84dd1",
+    "rating": 5
+  },
+  {
+    "user_id": "U_57af9657",
+    "movie_id": "M_7fdb30a9",
+    "rating": 4
+  },
+  {
+    "user_id": "U_57af9657",
+    "movie_id": "M_af0fd133",
+    "rating": 1
+  },
+  {
+    "user_id": "U_0d071496",
+    "movie_id": "M_209333a4",
     "rating": 3
   },
   {
-    "user_id": "U_XXX",
-    "movie_id": "M_XXX",
+    "user_id": "U_0d071496",
+    "movie_id": "M_a97eed78",
+    "rating": 4
+  },
+  {
+    "user_id": "U_7f82e6b8",
+    "movie_id": "M_7fdb30a9",
+    "rating": 4
+  },
+  {
+    "user_id": "U_7f82e6b8",
+    "movie_id": "M_17c507a7",
+    "rating": 4
+  },
+  {
+    "user_id": "U_422a919e",
+    "movie_id": "M_c05e8482",
     "rating": 3
+  },
+  {
+    "user_id": "U_422a919e",
+    "movie_id": "M_17c507a7",
+    "rating": 4
+  },
+  {
+    "user_id": "U_45dc984f",
+    "movie_id": "M_5f4858a7",
+    "rating": 2
+  },
+  {
+    "user_id": "U_45dc984f",
+    "movie_id": "M_5474b84d",
+    "rating": 3
+  },
+  {
+    "user_id": "U_d938ef1c",
+    "movie_id": "M_d6da6519",
+    "rating": 3
+  },
+  {
+    "user_id": "U_d938ef1c",
+    "movie_id": "M_c7ec1146",
+    "rating": 3
+  },
+  {
+    "user_id": "U_d20e4b9a",
+    "movie_id": "M_30111359",
+    "rating": 2
+  },
+  {
+    "user_id": "U_d20e4b9a",
+    "movie_id": "M_977e2d17",
+    "rating": 4
+  },
+  {
+    "user_id": "U_5f2a8dbc",
+    "movie_id": "M_b920bd2e",
+    "rating": 3
+  },
+  {
+    "user_id": "U_5f2a8dbc",
+    "movie_id": "M_7fdb30a9",
+    "rating": 3
+  },
+  {
+    "user_id": "U_c08d1bd4",
+    "movie_id": "M_32ec4893",
+    "rating": 3
+  },
+  {
+    "user_id": "U_c08d1bd4",
+    "movie_id": "M_23aff76c",
+    "rating": 3
+  },
+  {
+    "user_id": "U_6f2d902e",
+    "movie_id": "M_a1b7b6ec",
+    "rating": 2
+  },
+  {
+    "user_id": "U_6f2d902e",
+    "movie_id": "M_b06c1563",
+    "rating": 5
+  },
+  {
+    "user_id": "U_be3777f6",
+    "movie_id": "M_06d6e853",
+    "rating": 4
+  },
+  {
+    "user_id": "U_be3777f6",
+    "movie_id": "M_e5bdfd67",
+    "rating": 4
+  },
+  {
+    "user_id": "U_6a98c9f9",
+    "movie_id": "M_b106aa41",
+    "rating": 5
+  },
+  {
+    "user_id": "U_6a98c9f9",
+    "movie_id": "M_b7eb0e20",
+    "rating": 4
+  },
+  {
+    "user_id": "U_c80ce479",
+    "movie_id": "M_1c3e11bc",
+    "rating": 5
+  },
+  {
+    "user_id": "U_c80ce479",
+    "movie_id": "M_37374db0",
+    "rating": 4
+  },
+  {
+    "user_id": "U_9a3388a2",
+    "movie_id": "M_12cf8f03",
+    "rating": 5
+  },
+  {
+    "user_id": "U_9a3388a2",
+    "movie_id": "M_17c507a7",
+    "rating": 3
+  },
+  {
+    "user_id": "U_24d3a149",
+    "movie_id": "M_50e58a00",
+    "rating": 4
+  },
+  {
+    "user_id": "U_24d3a149",
+    "movie_id": "M_6386f28d",
+    "rating": 3
+  },
+  {
+    "user_id": "U_457b9ac9",
+    "movie_id": "M_26be5f58",
+    "rating": 2
+  },
+  {
+    "user_id": "U_457b9ac9",
+    "movie_id": "M_45ecade0",
+    "rating": 3
+  },
+  {
+    "user_id": "U_024686f5",
+    "movie_id": "M_93763093",
+    "rating": 2
+  },
+  {
+    "user_id": "U_024686f5",
+    "movie_id": "M_b106aa41",
+    "rating": 4
+  },
+  {
+    "user_id": "U_b36c39d8",
+    "movie_id": "M_41955bbc",
+    "rating": 4
+  },
+  {
+    "user_id": "U_b36c39d8",
+    "movie_id": "M_b959fcd7",
+    "rating": 4
+  },
+  {
+    "user_id": "U_5bff60a2",
+    "movie_id": "M_41955bbc",
+    "rating": 3
+  },
+  {
+    "user_id": "U_5bff60a2",
+    "movie_id": "M_1e9222e4",
+    "rating": 2
+  },
+  {
+    "user_id": "U_222bd529",
+    "movie_id": "M_a671ac39",
+    "rating": 3
+  },
+  {
+    "user_id": "U_222bd529",
+    "movie_id": "M_dc0b9d85",
+    "rating": 4
+  },
+  {
+    "user_id": "U_904db2a4",
+    "movie_id": "M_20476fbe",
+    "rating": 5
+  },
+  {
+    "user_id": "U_904db2a4",
+    "movie_id": "M_b106aa41",
+    "rating": 3
+  },
+  {
+    "user_id": "U_943f2c33",
+    "movie_id": "M_6386f28d",
+    "rating": 3
+  },
+  {
+    "user_id": "U_943f2c33",
+    "movie_id": "M_aa7cd5e5",
+    "rating": 5
+  },
+  {
+    "user_id": "U_881c228f",
+    "movie_id": "M_8303ce4d",
+    "rating": 3
+  },
+  {
+    "user_id": "U_881c228f",
+    "movie_id": "M_aca7aaf3",
+    "rating": 3
+  },
+  {
+    "user_id": "U_291fa66d",
+    "movie_id": "M_0500aea2",
+    "rating": 5
+  },
+  {
+    "user_id": "U_291fa66d",
+    "movie_id": "M_590261c9",
+    "rating": 4
+  },
+  {
+    "user_id": "U_3f96f8eb",
+    "movie_id": "M_4ce7443b",
+    "rating": 5
+  },
+  {
+    "user_id": "U_3f96f8eb",
+    "movie_id": "M_88ce4c78",
+    "rating": 2
+  },
+  {
+    "user_id": "U_4493da6c",
+    "movie_id": "M_8daf07ba",
+    "rating": 5
+  },
+  {
+    "user_id": "U_4493da6c",
+    "movie_id": "M_6d1a86b7",
+    "rating": 4
+  },
+  {
+    "user_id": "U_c9fe37e4",
+    "movie_id": "M_e693c426",
+    "rating": 4
+  },
+  {
+    "user_id": "U_c9fe37e4",
+    "movie_id": "M_8a3123fc",
+    "rating": 5
+  },
+  {
+    "user_id": "U_b9863b84",
+    "movie_id": "M_39dbe0ff",
+    "rating": 3
+  },
+  {
+    "user_id": "U_b9863b84",
+    "movie_id": "M_e693c426",
+    "rating": 5
+  },
+  {
+    "user_id": "U_71c53f9b",
+    "movie_id": "M_0e8133cf",
+    "rating": 3
+  },
+  {
+    "user_id": "U_71c53f9b",
+    "movie_id": "M_91f7b335",
+    "rating": 4
+  },
+  {
+    "user_id": "U_9672b2b3",
+    "movie_id": "M_a931129f",
+    "rating": 3
+  },
+  {
+    "user_id": "U_9672b2b3",
+    "movie_id": "M_b106aa41",
+    "rating": 4
+  },
+  {
+    "user_id": "U_0708ae14",
+    "movie_id": "M_366fae36",
+    "rating": 4
+  },
+  {
+    "user_id": "U_0708ae14",
+    "movie_id": "M_2967b9a7",
+    "rating": 2
+  },
+  {
+    "user_id": "U_0e9ae62b",
+    "movie_id": "M_4aeb76d0",
+    "rating": 1
+  },
+  {
+    "user_id": "U_0e9ae62b",
+    "movie_id": "M_b475c59d",
+    "rating": 1
+  },
+  {
+    "user_id": "U_84dcf498",
+    "movie_id": "M_388a127e",
+    "rating": 3
+  },
+  {
+    "user_id": "U_84dcf498",
+    "movie_id": "M_b106aa41",
+    "rating": 5
+  },
+  {
+    "user_id": "U_65394d60",
+    "movie_id": "M_a97eed78",
+    "rating": 5
+  },
+  {
+    "user_id": "U_65394d60",
+    "movie_id": "M_8303ce4d",
+    "rating": 2
+  },
+  {
+    "user_id": "U_07176389",
+    "movie_id": "M_b46acaa4",
+    "rating": 2
+  },
+  {
+    "user_id": "U_07176389",
+    "movie_id": "M_a45ed780",
+    "rating": 4
+  },
+  {
+    "user_id": "U_6d5bc766",
+    "movie_id": "M_d4e35739",
+    "rating": 4
+  },
+  {
+    "user_id": "U_6d5bc766",
+    "movie_id": "M_a76b8391",
+    "rating": 4
+  },
+  {
+    "user_id": "U_997eb5ad",
+    "movie_id": "M_a97eed78",
+    "rating": 4
+  },
+  {
+    "user_id": "U_997eb5ad",
+    "movie_id": "M_917bb284",
+    "rating": 4
+  },
+  {
+    "user_id": "U_3a88b631",
+    "movie_id": "M_b72b79d1",
+    "rating": 5
+  },
+  {
+    "user_id": "U_3a88b631",
+    "movie_id": "M_5c661a00",
+    "rating": 5
+  },
+  {
+    "user_id": "U_6a3247ba",
+    "movie_id": "M_e7c34a22",
+    "rating": 3
+  },
+  {
+    "user_id": "U_6a3247ba",
+    "movie_id": "M_c35b4b6b",
+    "rating": 4
+  },
+  {
+    "user_id": "U_808f9ec3",
+    "movie_id": "M_eb972c85",
+    "rating": 4
+  },
+  {
+    "user_id": "U_808f9ec3",
+    "movie_id": "M_55b5da7f",
+    "rating": 4
+  },
+  {
+    "user_id": "U_9536f03d",
+    "movie_id": "M_fcef65c6",
+    "rating": 4
+  },
+  {
+    "user_id": "U_9536f03d",
+    "movie_id": "M_6eb2b8fe",
+    "rating": 2
+  },
+  {
+    "user_id": "U_3ddced3c",
+    "movie_id": "M_7fdb30a9",
+    "rating": 3
+  },
+  {
+    "user_id": "U_3ddced3c",
+    "movie_id": "M_0c6e670c",
+    "rating": 3
+  },
+  {
+    "user_id": "U_b900c56d",
+    "movie_id": "M_1ae88aff",
+    "rating": 4
+  },
+  {
+    "user_id": "U_b900c56d",
+    "movie_id": "M_35a93acf",
+    "rating": 5
+  },
+  {
+    "user_id": "U_6aa8cfcd",
+    "movie_id": "M_8bd2b4ff",
+    "rating": 4
+  },
+  {
+    "user_id": "U_6aa8cfcd",
+    "movie_id": "M_4cff7247",
+    "rating": 4
+  },
+  {
+    "user_id": "U_bf1f0607",
+    "movie_id": "M_2ccddc9c",
+    "rating": 4
+  },
+  {
+    "user_id": "U_bf1f0607",
+    "movie_id": "M_17c507a7",
+    "rating": 4
+  },
+  {
+    "user_id": "U_2ce380e9",
+    "movie_id": "M_aa7cd5e5",
+    "rating": 4
+  },
+  {
+    "user_id": "U_2ce380e9",
+    "movie_id": "M_ffb98b20",
+    "rating": 4
+  },
+  {
+    "user_id": "U_a7088c69",
+    "movie_id": "M_7db9564c",
+    "rating": 3
+  },
+  {
+    "user_id": "U_a7088c69",
+    "movie_id": "M_f5aa832a",
+    "rating": 2
+  },
+  {
+    "user_id": "U_b062894e",
+    "movie_id": "M_e26fca5a",
+    "rating": 5
+  },
+  {
+    "user_id": "U_b062894e",
+    "movie_id": "M_aa7cd5e5",
+    "rating": 5
+  },
+  {
+    "user_id": "U_434a670b",
+    "movie_id": "M_3e19bae6",
+    "rating": 4
+  },
+  {
+    "user_id": "U_434a670b",
+    "movie_id": "M_8b113c05",
+    "rating": 5
   }
 ]
