@@ -1,115 +1,139 @@
 """
-FunkSVD — 基于矩阵分解的协同过滤（带偏置项）
-在评分残差上学习:  r - μ = b_u + b_i + p_u · q_i
-SGD 最小化正则化平方误差
+FunkSVD with user/item biases.
+
+The experiment flow is:
+1. Split train.txt into train/validation with a fixed seed.
+2. Use validation RMSE only to select hyperparameters and best epoch.
+3. Retrain the selected configuration on the full train.txt.
+4. Predict test.txt and write results/funk_svd_result.txt.
 """
-import numpy as np
+from __future__ import annotations
+
+import copy
 import time
-import os
 from collections import defaultdict
+
+import numpy as np
+
+from common import (
+    DEFAULT_SEED,
+    build_rating_stats,
+    clip_score,
+    cold_start_fallback,
+    compute_mae,
+    compute_rmse,
+    load_ratings,
+    memory_mb_for_arrays,
+    set_random_seed,
+    train_test_split,
+    write_predictions,
+)
 
 
 class FunkSVD:
-    """
-    FunkSVD with global mean, user/item biases, and latent factors.
-
-    预测公式: r̂ = μ + b_u + b_i + p_u · q_i
-    在残差 r - μ 上学习，所有参数初始化为 0/小随机数，数值稳定。
-    """
-
-    def __init__(self, n_factors=50, lr=0.005, reg=0.02, n_epochs=20,
-                 early_stopping=True, patience=3, lr_decay=0.95, verbose=True):
+    def __init__(
+        self,
+        n_factors: int = 50,
+        lr: float = 0.005,
+        reg: float = 0.02,
+        n_epochs: int = 20,
+        early_stopping: bool = True,
+        patience: int = 3,
+        lr_decay: float = 0.95,
+        seed: int = DEFAULT_SEED,
+        verbose: bool = True,
+    ):
         self.n_factors = n_factors
+        self.initial_lr = lr
         self.lr = lr
-        self.reg = reg              # L2 正则化系数
+        self.reg = reg
         self.n_epochs = n_epochs
         self.early_stopping = early_stopping
         self.patience = patience
-        self.lr_decay = lr_decay    # 每轮学习率衰减因子
+        self.lr_decay = lr_decay
+        self.seed = seed
         self.verbose = verbose
 
-        # 可学习参数
-        self.global_mean = 0.0            # μ
-        self.bu = defaultdict(float)      # 用户偏置
-        self.bi = defaultdict(float)      # 物品偏置
-        self.P = {}                       # 用户隐向量  p_u
-        self.Q = {}                       # 物品隐向量  q_i
+        self.global_mean = 0.0
+        self.bu = defaultdict(float)
+        self.bi = defaultdict(float)
+        self.P = {}
+        self.Q = {}
+        self.stats = None
+        self.best_epoch = n_epochs
+        self.history = []
+        self.train_time = 0.0
 
     def _init_params(self, ratings):
-        """初始化参数 — 残差学习，参数初始化为 0/小随机数"""
-        self.global_mean = sum(r for _, _, r in ratings) / len(ratings)
+        self.lr = self.initial_lr
+        self.stats = build_rating_stats(ratings)
+        self.global_mean = self.stats.global_mean
 
-        users = set(r[0] for r in ratings)
-        items = set(r[1] for r in ratings)
+        users = sorted({u for u, _, _ in ratings})
+        items = sorted({i for _, i, _ in ratings})
+        rng = np.random.RandomState(self.seed)
+        scale = 0.05 / np.sqrt(self.n_factors)
 
-        scale = 0.1 / np.sqrt(self.n_factors)  # 小方差初始化
+        self.bu = defaultdict(float)
+        self.bi = defaultdict(float)
+        self.P = {}
+        self.Q = {}
         for u in users:
             self.bu[u] = 0.0
-            self.P[u] = np.random.normal(0, scale, self.n_factors)
+            self.P[u] = rng.normal(0, scale, self.n_factors)
         for i in items:
             self.bi[i] = 0.0
-            self.Q[i] = np.random.normal(0, scale, self.n_factors)
+            self.Q[i] = rng.normal(0, scale, self.n_factors)
 
     def fit(self, train_ratings, valid_ratings=None):
-        """
-        训练模型
-
-        train_ratings: list of (user, item, rating)
-        valid_ratings: list of (user, item, rating) for early stopping
-        """
         t0 = time.time()
+        train_ratings = list(train_ratings)
+        valid_ratings = list(valid_ratings or [])
         self._init_params(train_ratings)
 
+        rng = np.random.RandomState(self.seed + 17)
         best_rmse = float("inf")
         best_state = None
         stall = 0
+        self.history = []
+        self.best_epoch = self.n_epochs
 
         for epoch in range(1, self.n_epochs + 1):
-            np.random.shuffle(train_ratings)
+            rng.shuffle(train_ratings)
 
             for u, i, r in train_ratings:
-                # 残差 = 真实评分 - 全局均值
-                residual = r - self.global_mean
-                # 误差 = 残差 - (b_u + b_i + p_u·q_i)
-                pred_residual = self.bu[u] + self.bi[i] + np.dot(self.P[u], self.Q[i])
-                err = residual - pred_residual
-
-                # 梯度裁剪，防止单步更新过大
-                err = np.clip(err, -50, 50)
-
                 pu = self.P[u]
                 qi = self.Q[i]
+                pred = self.global_mean + self.bu[u] + self.bi[i] + np.dot(pu, qi)
+                err = np.clip(r - pred, -50.0, 50.0)
 
-                # SGD 更新（带梯度裁剪）
                 grad_bu = err - self.reg * self.bu[u]
                 grad_bi = err - self.reg * self.bi[i]
-                grad_pu = err * qi - self.reg * pu
-                grad_qi = err * pu - self.reg * qi
-
-                # 裁剪隐因子梯度
-                grad_pu = np.clip(grad_pu, -10, 10)
-                grad_qi = np.clip(grad_qi, -10, 10)
+                grad_pu = np.clip(err * qi - self.reg * pu, -10.0, 10.0)
+                grad_qi = np.clip(err * pu - self.reg * qi, -10.0, 10.0)
 
                 self.bu[u] += self.lr * grad_bu
                 self.bi[i] += self.lr * grad_bi
                 self.P[u] += self.lr * grad_pu
                 self.Q[i] += self.lr * grad_qi
 
-            # 学习率衰减
             self.lr *= self.lr_decay
 
-            # 评估
             if valid_ratings:
-                rmse = self.compute_rmse(valid_ratings)
+                rmse = compute_rmse(self, valid_ratings, clip=False)
+                mae = compute_mae(self, valid_ratings, clip=False)
+                self.history.append((epoch, rmse, mae))
                 if self.verbose:
                     elapsed = time.time() - t0
-                    print(f"  Epoch {epoch:>3}/{self.n_epochs}  "
-                          f"valid RMSE: {rmse:.4f}  "
-                          f"({elapsed:.1f}s)")
+                    print(
+                        f"  Epoch {epoch:>3}/{self.n_epochs}  "
+                        f"valid RMSE: {rmse:.4f}  MAE: {mae:.4f}  ({elapsed:.1f}s)"
+                    )
 
                 if self.early_stopping:
                     if rmse < best_rmse - 1e-5:
                         best_rmse = rmse
+                        self.best_epoch = epoch
                         best_state = self._save_state()
                         stall = 0
                     else:
@@ -119,58 +143,46 @@ class FunkSVD:
                                 print(f"  -> early stopped at epoch {epoch}")
                             break
             elif self.verbose:
+                train_rmse = compute_rmse(self, train_ratings, clip=False)
                 elapsed = time.time() - t0
-                train_rmse = self.compute_rmse(train_ratings)
-                print(f"  Epoch {epoch:>3}/{self.n_epochs}  "
-                      f"train RMSE: {train_rmse:.4f}  "
-                      f"({elapsed:.1f}s)")
+                print(f"  Epoch {epoch:>3}/{self.n_epochs}  train RMSE: {train_rmse:.4f}  ({elapsed:.1f}s)")
 
-        # 恢复最优参数
         if best_state is not None:
             self._load_state(best_state)
 
         self.train_time = time.time() - t0
         return self
 
-    def _predict_residual(self, u, i):
-        """预测残差 b_u + b_i + p_u·q_i"""
-        if u not in self.P or i not in self.Q:
-            return self.bu.get(u, 0.0) + self.bi.get(i, 0.0)
-        return self.bu[u] + self.bi[i] + np.dot(self.P[u], self.Q[i])
+    def _predict_one(self, uid, iid):
+        if self.stats is None:
+            raise RuntimeError("model is not fitted")
+        if uid not in self.P or iid not in self.Q:
+            return cold_start_fallback(uid, iid, self.stats)
+        return self.global_mean + self.bu[uid] + self.bi[iid] + np.dot(self.P[uid], self.Q[iid])
 
-    def _predict_one(self, u, i):
-        """预测评分（无裁剪）"""
-        return self.global_mean + self._predict_residual(u, i)
-
-    def predict(self, u, i, clip=True):
-        """预测单个 (u, i) 的评分"""
-        pred = self._predict_one(u, i)
-        if clip:
-            pred = max(10, min(100, pred))
-        return pred
+    def predict(self, uid, iid, clip=True):
+        pred = self._predict_one(uid, iid)
+        return clip_score(pred) if clip else float(pred)
 
     def predict_batch(self, pairs):
-        """批量预测 [(u,i), ...] -> [score, ...]"""
         return [self.predict(u, i) for u, i in pairs]
 
     def compute_rmse(self, ratings):
-        """计算 RMSE"""
-        if not ratings:
-            return float("inf")
-        squared = 0.0
-        for u, i, r in ratings:
-            err = r - self._predict_one(u, i)
-            squared += err * err
-        return np.sqrt(squared / len(ratings))
+        return compute_rmse(self, ratings, clip=False)
+
+    def memory_mb(self):
+        arrays = list(self.P.values()) + list(self.Q.values())
+        return memory_mb_for_arrays(arrays)
 
     def _save_state(self):
-        import copy
         return {
             "global_mean": self.global_mean,
             "bu": copy.deepcopy(dict(self.bu)),
             "bi": copy.deepcopy(dict(self.bi)),
-            "P": copy.deepcopy(dict(self.P)),
-            "Q": copy.deepcopy(dict(self.Q)),
+            "P": copy.deepcopy(self.P),
+            "Q": copy.deepcopy(self.Q),
+            "lr": self.lr,
+            "best_epoch": self.best_epoch,
         }
 
     def _load_state(self, state):
@@ -179,134 +191,92 @@ class FunkSVD:
         self.bi = defaultdict(float, state["bi"])
         self.P = state["P"]
         self.Q = state["Q"]
+        self.lr = state["lr"]
+        self.best_epoch = state["best_epoch"]
 
 
-# ── 工具函数 ──────────────────────────────────────────────
-
-def load_ratings(filename, has_score=True):
-    """从文件中加载评分数据"""
-    filepath = os.path.join(os.path.dirname(__file__), "data", filename)
-    entries = []
-    with open(filepath, "r", encoding="utf-8") as f:
-        lines = [l.strip() for l in f if l.strip()]
-    i = 0
-    while i < len(lines):
-        header = lines[i]; i += 1
-        uid, cnt = header.split("|"); cnt = int(cnt)
-        for _ in range(cnt):
-            parts = lines[i].split(); i += 1
-            if has_score:
-                entries.append((int(uid), int(parts[0]), int(parts[1])))
-            else:
-                entries.append((int(uid), int(parts[0])))
-    return entries
-
-
-def train_test_split(ratings, test_ratio=0.2, seed=42):
-    """按用户分层划分训练/验证集，保证每个用户在训练集中至少有 1 条"""
-    rng = np.random.RandomState(seed)
-    by_user = defaultdict(list)
-    for u, i, r in ratings:
-        by_user[u].append((u, i, r))
-    train, valid = [], []
-    for u, items in by_user.items():
-        rng.shuffle(items)
-        n_valid = max(1, int(len(items) * test_ratio))
-        valid.extend(items[:n_valid])
-        train.extend(items[n_valid:])
-    return train, valid
-
-
-def format_predictions(pairs, predictions):
-    """按照 ResultForm.txt 格式输出"""
-    by_user = defaultdict(list)
-    for (u, i), s in zip(pairs, predictions):
-        by_user[u].append((i, s))
-
-    lines = []
-    for u in sorted(by_user):
-        items = by_user[u]
-        lines.append(f"{u}|{len(items)}")
-        for item, score in items:
-            lines.append(f"{item}  {int(round(score)):>3}")
-    return "\n".join(lines)
-
-
-# ── 主训练脚本 ────────────────────────────────────────────
-if __name__ == "__main__":
+def run_experiment(seed: int = DEFAULT_SEED):
     print("=" * 50)
-    print("FunkSVD 模型训练")
+    print("FunkSVD model training")
     print("=" * 50)
 
-    # 1. 加载数据
+    set_random_seed(seed)
     ratings = load_ratings("train.txt", has_score=True)
     test_pairs = load_ratings("test.txt", has_score=False)
-    print(f"\n训练评分数: {len(ratings)}")
-    print(f"测试 (u,i) 对数: {len(test_pairs)}")
-
-    # 2. 划分训练/验证集
-    train, valid = train_test_split(ratings, test_ratio=0.1)
-    print(f"留出验证: {len(valid)} 条")
-
-    # 3. 网格搜索
-    print("\n" + "=" * 50)
-    print("网格搜索超参数")
-    print("=" * 50)
+    train, valid = train_test_split(ratings, test_ratio=0.1, seed=seed)
+    print(f"\nTrain ratings: {len(ratings)}")
+    print(f"Validation ratings: {len(valid)}")
+    print(f"Test pairs: {len(test_pairs)}")
 
     param_grid = [
-        # (n_factors, lr, reg)
-        (50,  0.005, 0.05),
-        (50,  0.005, 0.10),
-        (50,  0.003, 0.10),
-        (100, 0.005, 0.05),
+        (50, 0.005, 0.08),
+        (50, 0.005, 0.10),
+        (80, 0.005, 0.10),
         (100, 0.005, 0.10),
-        (100, 0.003, 0.10),
+        (100, 0.004, 0.10),
+        (100, 0.005, 0.12),
     ]
 
     best_model = None
     best_rmse = float("inf")
     best_params = None
 
+    print("\n" + "=" * 50)
+    print("Grid search")
+    print("=" * 50)
     for n_factors, lr, reg in param_grid:
         print(f"\n-- n_factors={n_factors}, lr={lr}, reg={reg} --")
         model = FunkSVD(
             n_factors=n_factors,
             lr=lr,
             reg=reg,
-            n_epochs=25,
+            n_epochs=30,
             early_stopping=True,
             patience=4,
             lr_decay=0.97,
+            seed=seed,
             verbose=True,
         )
         model.fit(train, valid)
-
         rmse = model.compute_rmse(valid)
-        print(f"  -> valid RMSE: {rmse:.4f}  time: {model.train_time:.1f}s")
-
+        print(
+            f"  -> valid RMSE: {rmse:.4f}  best_epoch: {model.best_epoch}  "
+            f"time: {model.train_time:.1f}s"
+        )
         if rmse < best_rmse:
             best_rmse = rmse
             best_model = model
-            best_params = (n_factors, lr, reg)
+            best_params = (n_factors, lr, reg, model.best_epoch)
 
-    # 4. 最优结果
-    print(f"\n{'=' * 50}")
-    print(f"最优参数: n_factors={best_params[0]}, lr={best_params[1]}, reg={best_params[2]}")
-    print(f"验证集 RMSE: {best_rmse:.4f}")
-    train_rmse = best_model.compute_rmse(train)
-    print(f"训练集 RMSE: {train_rmse:.4f}")
-    print(f"训练用时:    {best_model.train_time:.2f} 秒")
+    n_factors, lr, reg, best_epoch = best_params
+    print(f"\nBest params: n_factors={n_factors}, lr={lr}, reg={reg}, epochs={best_epoch}")
+    print(f"Validation RMSE: {best_rmse:.4f}")
+    print(f"Validation train RMSE: {best_model.compute_rmse(train):.4f}")
+    print(f"Validation model memory: {best_model.memory_mb():.2f} MB")
 
-    # 5. 预测测试集
-    print(f"\n[预测测试集...]")
-    predictions = best_model.predict_batch(test_pairs)
+    print("\n[Retraining on full train.txt...]")
+    final_model = FunkSVD(
+        n_factors=n_factors,
+        lr=lr,
+        reg=reg,
+        n_epochs=best_epoch,
+        early_stopping=False,
+        lr_decay=0.97,
+        seed=seed,
+        verbose=True,
+    )
+    final_model.fit(ratings)
 
-    # 6. 保存结果
-    output_dir = os.path.join(os.path.dirname(__file__), "results")
-    os.makedirs(output_dir, exist_ok=True)
+    predictions = final_model.predict_batch(test_pairs)
+    result_path = write_predictions("funk_svd_result.txt", test_pairs, predictions)
+    print(f"Result saved to {result_path}")
+    return {
+        "model": final_model,
+        "best_rmse": best_rmse,
+        "best_params": best_params,
+        "result_path": result_path,
+    }
 
-    result_text = format_predictions(test_pairs, predictions)
-    result_path = os.path.join(output_dir, "funk_svd_result.txt")
-    with open(result_path, "w", encoding="utf-8") as f:
-        f.write(result_text)
-    print(f"结果已保存到 {result_path}")
+
+if __name__ == "__main__":
+    run_experiment()

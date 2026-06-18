@@ -2,76 +2,49 @@
 
 ## 项目概述
 
-预测 `test.txt` 中 (用户, 物品) 对的评分分数。实现了三种推荐算法并进行对比分析。
+预测 `data/test.txt` 中未知 `(user, item)` 对的评分。当前实现以 RMSE 和稳健复现为目标，保留 Baseline、FunkSVD、SVD++、Item-KNN 四类模型，并新增验证集加权融合。
 
-**数据集**: 598 用户 × 9,077 物品 × 90,854 条评分，稀疏度 98.47%
+**数据集**: 598 个训练用户、9,077 个训练物品、90,854 条训练评分；测试集 610 个用户、9,982 个待预测 `(u, i)` 对；稀疏度约 98.47%。
 
----
+## 当前结果
 
-## 已完成工作
+所有结果使用固定随机种子 `42`，按用户分层留出 10% 训练评分作为验证集。模型选参后会用完整 `train.txt` 重新训练，再预测 `test.txt`。
 
-### 1. 数据探索与统计 ✅
+| 模型 | Valid RMSE | 最优参数 | 完整训练策略 | 预测文件 |
+|------|-----------:|----------|--------------|----------|
+| **Weighted Ensemble** | **16.5188** | Baseline 0.20 + FunkSVD 0.65 + SVD++ 0.15 | 各成员完整训练后融合 | `results/ensemble_result.txt` |
+| FunkSVD | 16.6316 | factors=100, lr=0.005, reg=0.12, epochs=5 | 完整训练 5 epoch | `results/funk_svd_result.txt` |
+| SVD++ | 16.9001 | factors=50, lr=0.002, reg=0.10, samples=20 | 完整训练上限 6 epoch，避免后期发散 | `results/svdpp_result.txt` |
+| Baseline | 17.2272 | reg_user=10, reg_item=10, epochs=18 | 完整训练 18 epoch | `results/baseline_result.txt` |
+| Item-KNN | 19.3244 | k=80, min_common=3 | 完整训练相似度缓存 | `results/knn_result.txt` |
 
-| 指标 | 数值 |
-|------|------|
-| 训练集用户数 | 598 |
-| 训练集物品数 | 9,077 |
-| 训练集评分数 | 90,854 |
-| 测试集 (u,i) 对数 | 9,982 |
-| 全部物品数 | 9,724 |
-| 稀疏度 | 98.47% |
-| 评分均值 | 69.88 |
-| 评分范围 | 10 ~ 100 |
-| 评论频率最低的物品 | 仅评 5 次（<5个）的占 65.6% |
+**推荐提交文件**: `results/ensemble_result.txt`。它在当前验证集上优于单独的 FunkSVD。
 
-**相关文件**: `data_exploration.py`, `stats_output.txt`
+## 代码结构
 
-### 2. 算法实现与对比 ✅
-
-| 算法 | Valid RMSE | 最优参数 | 训练时间 | 预测文件 |
-|------|-----------|---------|---------|---------|
-| **FunkSVD** 🥇 | **16.63** | k=100, lr=0.005, reg=0.1 | 37s | `results/funk_svd_result.txt` |
-| SVD++ 🥈 | 16.91 | k=50, lr=0.005, reg=0.1 | 198s | `results/svdpp_result.txt` |
-| Item-KNN 🥉 | 19.32 | k=80 | 207s | `results/knn_result.txt` |
-
-#### 算法简介
-
-- **FunkSVD**: 矩阵分解，学习用户/物品隐向量 + 偏置项。最简洁，效果最好
-- **SVD++**: 在 FunkSVD 基础上加入隐式反馈（采样 SGD 加速）。参数多易过拟合
-- **Item-KNN**: 基于物品相似度的 K 近邻。可解释性强，但在稀疏数据上效果较差
-
-#### 排名分析
-
-矩阵分解 > 矩阵分解+隐式反馈 > 邻域方法，原因：
-- 98.47% 稀疏度下，物品间共现太少，KNN 相似度不可靠
-- SVD++ 的隐式反馈向量增加了 45 万参数，稀疏数据下过拟合
-- FunkSVD 隐因子泛化能力最强，是这个数据集上的最优选择
-
----
-
-## 文件结构
-
-```
+```text
 任务一/
-├── README.md                    ← 本文件
+├── common.py              # 数据读取、划分、指标、结果格式化、结果校验
+├── baseline.py            # global mean + user/item bias 基线模型
+├── funk_svd.py            # 带偏置的 FunkSVD
+├── svdpp.py               # 采样版 SVD++
+├── knn_cf.py              # Item-KNN 协同过滤
+├── ensemble.py            # 验证集权重搜索 + 完整训练融合预测
+├── validate_results.py    # 检查预测文件覆盖、重复、范围和格式
+├── data_exploration.py    # 数据统计脚本
 ├── data/
-│   ├── train.txt                # 训练数据
-│   ├── test.txt                 # 测试数据
-│   ├── DataFormatExplanation.txt # 数据格式说明
-│   └── ResultForm.txt           # 结果提交模板
-├── results/
-│   ├── rmse_summary.txt         # 所有 RMSE 网格搜索记录
-│   ├── funk_svd_result.txt      # FunkSVD 预测结果
-│   ├── svdpp_result.txt         # SVD++ 预测结果
-│   └── knn_result.txt           # KNN-CF 预测结果
-├── data_exploration.py          # 数据探索脚本
-├── stats_output.txt             # 数据统计输出
-├── funk_svd.py                  # FunkSVD 模型
-├── svdpp.py                     # SVD++ 模型
-└── knn_cf.py                    # Item-KNN 模型
+│   ├── train.txt
+│   ├── test.txt
+│   ├── DataFormatExplanation.txt
+│   └── ResultForm.txt
+└── results/
+    ├── baseline_result.txt
+    ├── funk_svd_result.txt
+    ├── svdpp_result.txt
+    ├── knn_result.txt
+    ├── ensemble_result.txt
+    └── rmse_summary.txt
 ```
-
----
 
 ## 运行方式
 
@@ -79,16 +52,32 @@
 # 数据探索
 python data_exploration.py
 
-# 各模型训练 + 预测（均包含网格搜索）
+# 单模型训练 + 完整训练预测
+python baseline.py
 python funk_svd.py
 python svdpp.py
 python knn_cf.py
+
+# 默认融合 Baseline + FunkSVD + SVD++
+python ensemble.py
+
+# 如需把较慢且较弱的 KNN 也纳入融合
+python ensemble.py --include-knn
+
+# 校验所有结果文件
+python validate_results.py
 ```
 
----
+## 实现要点
+
+- `common.py` 统一数据协议，所有模型使用同一个解析、留出验证、RMSE/MAE、评分裁剪和结果输出逻辑。
+- 网格搜索只用于验证集选参；最终结果文件统一来自完整 `train.txt` 重训后的模型。
+- 冷启动预测统一回退到用户均值、物品均值、Baseline/全局均值，所有输出评分裁剪到 `10-100`。
+- SVD++ 在验证集上第 8 轮最好，但完整训练后期容易发散，因此最终完整训练限制到 6 轮，保留更稳的预测文件。
+- `validate_results.py` 会检查输出是否覆盖 `test.txt` 的全部 9,982 个 `(u, i)` 对，并确认评分范围合法。
 
 ## 待完成
 
-- [ ] 实验报告（统计信息 + 算法描述 + 实验结果 + 理论/实验分析）
-- [ ] 最终提交: 源码 + 可执行文件 + 报告 + 结果 打包发送至 bigdatacomputing@163.com
-- [ ] 截止时间: 2026年6月25日 24:00
+- [ ] 实验报告：数据统计、算法描述、RMSE/训练时间/空间消耗、理论和实验分析。
+- [ ] 最终提交：源码、可执行文件、实验报告、推荐预测结果 `ensemble_result.txt`。
+- [ ] 截止时间：2026年6月25日 24:00。
