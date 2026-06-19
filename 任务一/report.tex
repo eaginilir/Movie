@@ -1,3 +1,6 @@
+% 本报告中的图片使用外部 PDF 文件；主模板导言区需包含：
+% \usepackage{graphicx}
+
 \section{实验目的}
 
 推荐系统是解决信息过载问题的核心技术之一，其核心任务是根据用户的历史行为预测其对未交互物品的偏好。本实验以电影评分数据为载体，围绕协同过滤的两大范式——基于模型的方法（矩阵分解）与基于记忆的方法（近邻法）——展开系统性的实现与对比，具体目标如下：
@@ -18,7 +21,7 @@
 
 表~\ref{tab:stats} 汇总了数据集的核心统计指标。
 
-\begin{table}[htbp]
+\begin{table}[H]
     \centering
     \caption{数据集基本统计量}
     \label{tab:stats}
@@ -46,7 +49,7 @@
 
 训练集中评分范围为 $[10, 100]$，评分统计量如表~\ref{tab:rating_stats} 所示，每 10 分一档的分布见表~\ref{tab:rating_dist}。
 
-\begin{table}[htbp]
+\begin{table}[H]
     \centering
     \caption{评分统计量}
     \label{tab:rating_stats}
@@ -59,7 +62,7 @@
     \end{tabular}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[H]
     \centering
     \caption{评分分布（10 分档）}
     \label{tab:rating_dist}
@@ -80,7 +83,7 @@
 
 \subsection{用户与物品活跃度}
 
-\begin{table}[htbp]
+\begin{table}[H]
     \centering
     \caption{用户与物品的评分数分布}
     \label{tab:activity}
@@ -101,5 +104,194 @@
 测试集中有 12 个用户（占 2.0\%）和 647 个物品（占 17.9\%）从未在训练集中出现。对于新用户，模型只能依赖全局均值进行预测；对于新物品，基于物品相似度的 KNN 方法完全失效，而矩阵分解方法可通过偏置项给出合理的基线估计。
 \section{算法描述}
 \section{实验设计}
+
+\subsection{总体实验流程}
+
+为保证不同算法之间的比较公平，本实验将数据读取、验证集划分、评价指标、结果输出与结果校验统一封装在 \texttt{common.py} 中。所有模型均使用相同的数据划分和评价方式：先在 \texttt{train.txt} 上按用户分层抽取 10\% 评分作为验证集，每个用户至少保留 1 条评分用于训练；随后在训练子集上进行超参数搜索，以验证集 RMSE 选择最优参数；最后用选定参数在完整 \texttt{train.txt} 上重新训练，并预测 \texttt{test.txt} 中的 9,982 个未知评分。
+
+实验中固定随机种子为 42，以提高结果复现性。所有预测分数在写入结果文件前裁剪到 $[10,100]$，并使用 \texttt{validate\_results.py} 检查输出文件是否覆盖全部测试样本、是否存在重复或缺失、评分范围是否合法以及输出顺序是否与 \texttt{test.txt} 保持一致。
+
+\begin{table}[H]
+    \centering
+    \caption{实验流程与统一设置}
+    \label{tab:experiment_protocol}
+    \begin{tabular}{@{}ll@{}}
+        \toprule
+        \textbf{项目} & \textbf{设置} \\
+        \midrule
+        随机种子 & 42 \\
+        验证集划分 & 按用户分层留出 10\%，每个用户至少保留 1 条训练评分 \\
+        评价指标 & RMSE 为主，MAE 作为辅助观察指标 \\
+        最终训练 & 选参后使用完整 \texttt{train.txt} 重新训练 \\
+        输出范围 & 所有预测评分裁剪到 $[10,100]$ \\
+        结果校验 & 覆盖率、重复项、额外项、评分范围和测试顺序 \\
+        推荐提交 & \texttt{results/ensemble\_result.txt} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{评价指标}
+
+本实验以均方根误差（Root Mean Squared Error, RMSE）作为主要评价指标。设验证集中共有 $N$ 条真实评分，真实评分为 $r_{ui}$，模型预测评分为 $\hat{r}_{ui}$，则
+
+\[
+    \mathrm{RMSE} =
+    \sqrt{
+        \frac{1}{N}
+        \sum_{(u,i)}
+        \left(r_{ui} - \hat{r}_{ui}\right)^2
+    }.
+\]
+
+RMSE 对较大的预测偏差更加敏感，适合衡量评分预测任务中的整体误差水平。实验过程中还记录 MAE 与训练时间，用于辅助观察模型稳定性和计算开销，但最终模型选择以验证集 RMSE 为准。
+
+\subsection{模型与超参数设置}
+
+实验包含五类方法：偏置基线模型（Baseline）、矩阵分解模型 FunkSVD、加入隐式反馈的 SVD++、基于物品邻域的 Item-KNN，以及基于验证集预测的加权融合模型。Baseline 主要用于提供稳定的均值与偏置估计；FunkSVD 是主要的矩阵分解模型；SVD++ 尝试利用用户历史交互物品作为隐式反馈；Item-KNN 作为基于记忆的协同过滤对照；加权融合模型则在验证集上搜索各模型预测的凸组合权重。
+
+\begin{table}[H]
+    \centering
+    \caption{主要超参数搜索空间}
+    \label{tab:param_space}
+    \small
+    \begin{tabular}{@{}ll@{}}
+        \toprule
+        \textbf{模型} & \textbf{搜索或固定设置} \\
+        \midrule
+        Baseline & $(\lambda_u,\lambda_i)\in\{(10,10),(15,10),(20,10),(20,15),(30,20)\}$ \\
+        FunkSVD & $k\in\{50,80,100\}$，学习率 $\eta\in\{0.004,0.005\}$，正则 $\lambda\in\{0.08,0.10,0.12\}$ \\
+        SVD++ & $k=50$，$\eta\in\{0.002,0.003\}$，$\lambda\in\{0.10,0.12\}$，每次采样 20 个隐式反馈物品 \\
+        Item-KNN & $k\in\{30,50,80\}$，最少共同评分用户数为 3 \\
+        Ensemble & Baseline、FunkSVD、SVD++ 的权重以 0.05 为步长搜索，且权重和为 1 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+对于冷启动样本，代码采用分层回退策略：当用户存在而物品不存在时优先使用用户历史均值；当物品存在而用户不存在时使用物品历史均值；两者均缺失时回退到全局均值。该策略能够保证新用户、新物品样本不会产生异常预测。
+
 \section{实验结果}
+
+\subsection{总体性能比较}
+
+表~\ref{tab:model_results} 汇总了各模型在验证集上的 RMSE、最优配置和空间开销估计。可以看到，加权融合模型取得最低 RMSE，为 16.5188；单模型中 FunkSVD 表现最好，RMSE 为 16.6316；Item-KNN 的 RMSE 为 19.3244，明显弱于矩阵分解方法。
+
+\begin{table}[H]
+    \centering
+    \caption{各模型验证集结果汇总}
+    \label{tab:model_results}
+    \scriptsize
+    \setlength{\tabcolsep}{3pt}
+    \begin{tabular}{@{}p{0.16\textwidth}p{0.11\textwidth}p{0.21\textwidth}p{0.13\textwidth}p{0.21\textwidth}@{}}
+        \toprule
+        \textbf{模型} & \textbf{Valid RMSE} & \textbf{完整训练策略} & \textbf{空间估计} & \textbf{结果文件} \\
+        \midrule
+        Weighted Ensemble & \textbf{16.5188} & 成员完整训练后融合 & 约 14.36 MB + Baseline & \texttt{ensemble\_result.txt} \\
+        FunkSVD & 16.6316 & 完整训练 5 epoch & 7.14 MB & \texttt{funk\_svd\_result.txt} \\
+        SVD++ & 16.9001 & 完整训练上限 6 epoch & 7.22 MB & \texttt{svdpp\_result.txt} \\
+        Baseline & 17.2272 & 完整训练 18 epoch & 很小 & \texttt{baseline\_result.txt} \\
+        Item-KNN & 19.3244 & 完整构建相似度缓存 & 4.66 MB & \texttt{knn\_result.txt} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.82\textwidth]{figures/model_rmse_comparison.pdf}
+    \caption{不同模型的验证集 RMSE 对比}
+    \label{fig:model_rmse}
+\end{figure}
+
+图~\ref{fig:model_rmse} 更直观地展示了各模型的性能差异。融合模型相比最强单模型 FunkSVD 进一步降低了 0.1128 的 RMSE，说明不同模型之间存在一定互补性。最终推荐提交文件为 \texttt{results/ensemble\_result.txt}。
+
+\subsection{最优参数与融合权重}
+
+表~\ref{tab:best_params} 给出了各模型最终采用的关键参数。其中 SVD++ 在验证集上第 8 轮达到最优，但完整训练时后期容易出现震荡，因此最终预测阶段设置了 6 个 epoch 的稳定训练上限。
+
+\begin{table}[H]
+    \centering
+    \caption{各模型最优参数}
+    \label{tab:best_params}
+    \small
+    \begin{tabular}{@{}ll@{}}
+        \toprule
+        \textbf{模型} & \textbf{最优参数} \\
+        \midrule
+        Baseline & $\lambda_u=10,\lambda_i=10$，完整训练 18 epoch \\
+        FunkSVD & 隐因子数 $k=100$，学习率 0.005，正则 0.12，完整训练 5 epoch \\
+        SVD++ & 隐因子数 $k=50$，学习率 0.002，正则 0.10，采样数 20，完整训练 6 epoch \\
+        Item-KNN & 近邻数 $k=80$，最少共同评分用户数 3 \\
+        Ensemble & Baseline 0.20，FunkSVD 0.65，SVD++ 0.15 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.70\textwidth]{figures/ensemble_weights.pdf}
+    \caption{加权融合模型的最优权重}
+    \label{fig:ensemble_weights}
+\end{figure}
+
+由图~\ref{fig:ensemble_weights} 可见，融合模型主要依赖 FunkSVD（权重 0.65），同时引入 Baseline 的稳定偏置估计（权重 0.20）和 SVD++ 的少量隐式反馈信息（权重 0.15）。Item-KNN 在验证集上误差较大，因此默认不纳入最终融合。
+
+\subsection{超参数搜索结果}
+
+表~\ref{tab:grid_search} 展示了主要模型的关键搜索记录。FunkSVD 中，增大隐因子维度到 100 并适当提高正则化到 0.12 后取得最优；Baseline 对正则参数不太敏感，但较小的用户正则和物品正则组合效果最好；KNN 随近邻数增大而改善，说明更大的邻域能缓解部分稀疏性，但总体仍受限于物品共现不足。
+
+\begin{table}[H]
+    \centering
+    \caption{关键超参数搜索记录}
+    \label{tab:grid_search}
+    \footnotesize
+    \setlength{\tabcolsep}{3pt}
+    \begin{tabular}{@{}p{0.14\textwidth}p{0.48\textwidth}p{0.20\textwidth}@{}}
+        \toprule
+        \textbf{模型} & \textbf{参数设置} & \textbf{Valid RMSE} \\
+        \midrule
+        FunkSVD & $(50,0.005,0.08)$；$(50,0.005,0.10)$；$(80,0.005,0.10)$ & 16.6645；16.6527；16.6525 \\
+        FunkSVD & $(100,0.005,0.10)$；$(100,0.004,0.10)$；$(100,0.005,0.12)$ & 16.6378；16.6488；\textbf{16.6316} \\
+        SVD++ & $(50,0.002,0.10)$；$(50,0.003,0.10)$；$(50,0.003,0.12)$ & \textbf{16.9001}；17.6422；17.6372 \\
+        Baseline & $(10,10)$；$(15,10)$；$(20,10)$；$(20,15)$；$(30,20)$ & \textbf{17.2272}；17.2435；17.2601；17.3591；17.4730 \\
+        Item-KNN & $k=30$；$k=50$；$k=80$ & 19.9209；19.6662；\textbf{19.3244} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+最终所有结果文件均通过格式校验：每个结果文件都覆盖 9,982 个测试对，缺失数为 0、额外项为 0、重复项为 0，评分范围均在 $[10,100]$ 内，且输出顺序与 \texttt{test.txt} 一致。
+
 \section{分析与讨论}
+
+\subsection{评分分布与数据稀疏性的影响}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.82\textwidth]{figures/rating_distribution.pdf}
+    \caption{训练集评分分布}
+    \label{fig:rating_distribution}
+\end{figure}
+
+图~\ref{fig:rating_distribution} 显示，评分明显集中在 60--100 分区间，其中 80 分最多，共 24,177 条。这种高分偏态意味着简单地预测全局均值也可以获得一定基线效果，但要进一步提升精度，模型必须刻画用户和物品的个性化偏差。
+
+另一方面，数据稀疏度高达 98.47\%，物品被评分数中位数仅为 3。对于 Item-KNN，这意味着许多物品之间缺少足够共同评分用户，相似度估计方差很大；即使将近邻数从 30 增加到 80，RMSE 仍停留在 19.3244，明显弱于矩阵分解方法。相比之下，FunkSVD 通过低维隐向量共享统计信息，能够在稀疏矩阵中学习更稳定的用户和物品表示，因此取得更好的泛化效果。
+
+\subsection{各模型表现分析}
+
+Baseline 的 RMSE 为 17.2272，说明全局均值、用户偏置和物品偏置已经捕捉了相当一部分评分规律。这一结果也解释了为什么融合模型中 Baseline 仍有 0.20 的权重：它虽然表达能力有限，但对冷启动和长尾物品更加稳健。
+
+FunkSVD 是表现最好的单模型。其优势在于模型结构相对简洁，参数量可控，能够同时学习用户兴趣和物品属性的隐因子表示。在本实验中，$k=100$、正则 0.12 的组合取得最优结果，说明适当增加隐因子维度有助于提升表达能力，但仍需要较强正则化抑制过拟合。
+
+SVD++ 在 FunkSVD 基础上加入隐式反馈向量，理论上可以利用用户评价过的所有物品来补充偏好信息。但在本数据集中，大量物品极为长尾，隐式反馈参数会显著增加模型复杂度，训练后期容易震荡。因此代码中对完整训练阶段设置 6 轮上限，保留较稳定的预测状态。其验证 RMSE 为 16.9001，优于 Baseline，但弱于 FunkSVD。
+
+Item-KNN 的可解释性较强，可以通过相似物品给出直观推荐依据，但它高度依赖共现统计。在本数据集中，物品端长尾严重，大量物品共同评分用户不足，导致相似度估计不可靠；此外，测试集中包含 647 个训练集中未出现的新物品，这些样本对 KNN 尤其不利。
+
+\subsection{融合模型的提升原因}
+
+加权融合取得最低 RMSE（16.5188），主要原因是不同模型的误差具有互补性。FunkSVD 提供最强的主体预测能力；Baseline 提供稳定的用户和物品偏置，在冷启动、长尾物品和极端预测上更稳；SVD++ 虽然单独表现不如 FunkSVD，但其隐式反馈项仍能提供部分额外信息。通过验证集搜索得到的权重分配符合这一观察：FunkSVD 占主导，Baseline 和 SVD++ 作为辅助修正。
+
+从实验角度看，融合带来的提升并不依赖复杂模型，而是来自稳定的实验流程：固定随机种子、统一验证集、先选参再完整训练、输出裁剪和结果校验。这些步骤减少了偶然性和格式错误，使模型比较更可信。
+
+\subsection{局限性与改进方向}
+
+本实验仍存在若干局限。首先，当前只使用一次固定验证集划分，虽然可复现，但不能完全反映不同划分下的波动；后续可以采用多次随机划分或交叉验证估计结果方差。其次，融合权重仅以 0.05 为步长搜索，粒度较粗，可以进一步使用连续优化或按用户活跃度、物品热度分组学习不同权重。最后，当前冷启动策略只基于均值和偏置，没有利用电影内容、标签或时间信息；如果能够引入物品属性或用户侧特征，冷启动样本的预测仍有提升空间。
+
+总体而言，在该高稀疏电影评分数据集上，矩阵分解方法明显优于邻域方法；在稳健偏置模型和隐式反馈模型的辅助下，简单加权融合进一步提升了预测精度，因此最终选择 \texttt{results/ensemble\_result.txt} 作为提交结果。
