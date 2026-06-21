@@ -141,6 +141,7 @@ def run_experiment(seed: int = DEFAULT_SEED, include_knn: bool = False, weight_s
 
     valid_predictions = []
     trained_info = []
+    validation_train_time = 0.0
 
     for spec in specs:
         print(f"\n[{spec['name']}] validation training")
@@ -154,7 +155,16 @@ def run_experiment(seed: int = DEFAULT_SEED, include_knn: bool = False, weight_s
         if best_epoch is not None:
             print(f"  selected epoch: {best_epoch}")
         valid_predictions.append(preds)
-        trained_info.append({"name": spec["name"], "spec": spec, "rmse": rmse, "best_epoch": best_epoch})
+        validation_train_time += getattr(model, "train_time", 0.0)
+        trained_info.append(
+            {
+                "name": spec["name"],
+                "spec": spec,
+                "rmse": rmse,
+                "best_epoch": best_epoch,
+                "validation_train_time": getattr(model, "train_time", 0.0),
+            }
+        )
 
     weights, ensemble_rmse = search_weights(valid_predictions, actual, step=weight_step)
     print("\n" + "=" * 50)
@@ -166,6 +176,7 @@ def run_experiment(seed: int = DEFAULT_SEED, include_knn: bool = False, weight_s
 
     print("\n[Retraining ensemble members on full train.txt...]")
     final_predictions = []
+    final_member_stats = []
     for info, weight in zip(trained_info, weights):
         if weight <= 0:
             continue
@@ -177,6 +188,14 @@ def run_experiment(seed: int = DEFAULT_SEED, include_knn: bool = False, weight_s
         model = spec["factory"](epochs=best_epoch, verbose=True)
         model.fit(ratings)
         final_predictions.append((weight, predict_raw(model, test_pairs)))
+        final_member_stats.append(
+            {
+                "name": info["name"],
+                "weight": float(weight),
+                "train_time": getattr(model, "train_time", 0.0),
+                "memory_mb": float(model.memory_mb()) if hasattr(model, "memory_mb") else 0.0,
+            }
+        )
 
     if not final_predictions:
         raise RuntimeError("all ensemble weights are zero")
@@ -190,11 +209,20 @@ def run_experiment(seed: int = DEFAULT_SEED, include_knn: bool = False, weight_s
     combined = np.clip(combined, MIN_SCORE, MAX_SCORE)
 
     result_path = write_predictions("ensemble_result.txt", test_pairs, combined)
+    final_train_time = sum(item["train_time"] for item in final_member_stats)
+    final_memory_mb = sum(item["memory_mb"] for item in final_member_stats)
+    print(f"Validation-stage member training time: {validation_train_time:.1f}s")
+    print(f"Final ensemble member training time: {final_train_time:.1f}s")
+    print(f"Final ensemble memory footprint: {final_memory_mb:.2f} MB")
     print(f"\nResult saved to {result_path}")
     print(f"Total ensemble time: {time.time() - t0:.1f}s")
     return {
         "weights": {info["name"]: float(weight) for info, weight in zip(trained_info, weights)},
         "best_rmse": ensemble_rmse,
+        "validation_train_time": validation_train_time,
+        "train_time": final_train_time,
+        "memory_mb": final_memory_mb,
+        "member_stats": final_member_stats,
         "result_path": result_path,
     }
 

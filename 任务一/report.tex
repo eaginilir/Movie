@@ -1,6 +1,200 @@
-% 本报告中的图片使用外部 PDF 文件；主模板导言区需包含：
-% \usepackage{graphicx}
+ % -*- coding: utf-8 -*-
+%-------------------------designed by zcf--------------
+\documentclass[UTF8,a4paper,10pt]{ctexart}
+\usepackage[left=3.17cm, right=3.17cm, top=2.74cm, bottom=2.74cm]{geometry}
+\usepackage{amsmath}
+\usepackage{graphicx,subfig}
+\usepackage{float}
+\usepackage{cite}
+\usepackage{caption}
+\usepackage{enumerate}
+\usepackage{booktabs} %表格
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{url}
+\usepackage{multirow}
+\newcommand{\tabincell}[2]{\begin{tabular}{@{}#1@{}}#2\end{tabular}}  %表格强制换行
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning}
+%-------------------------字体设置--------------
+\definecolor{CodeBg}{RGB}{248,248,248}
+\definecolor{CodeGreen}{RGB}{0,128,0}
+\definecolor{CodeGray}{RGB}{120,120,120}
+\definecolor{CodePurple}{RGB}{136,0,136}
+\definecolor{CodeBlue}{RGB}{0,0,180}
+\definecolor{CodeOrange}{RGB}{200,100,0}
+% \usepackage{times} 
+\usepackage{ctex}
+\usepackage[numbers]{natbib}
+\setCJKmainfont[ItalicFont=Noto Sans CJK SC Bold, BoldFont=Noto Serif CJK SC Black]{Noto Serif CJK SC}
+\newcommand{\yihao}{\fontsize{26pt}{36pt}\selectfont}           % 一号, 1.4 倍行距
+\newcommand{\erhao}{\fontsize{22pt}{28pt}\selectfont}          % 二号, 1.25倍行距
+\newcommand{\xiaoer}{\fontsize{18pt}{18pt}\selectfont}          % 小二, 单倍行距
+\newcommand{\sanhao}{\fontsize{16pt}{24pt}\selectfont}  %三号字
+\newcommand{\xiaosan}{\fontsize{15pt}{22pt}\selectfont}        % 小三, 1.5倍行距
+\newcommand{\sihao}{\fontsize{14pt}{21pt}\selectfont}            % 四号, 1.5 倍行距
+\newcommand{\banxiaosi}{\fontsize{13pt}{19.5pt}\selectfont}    % 半小四, 1.5倍行距
+\newcommand{\xiaosi}{\fontsize{12pt}{18pt}\selectfont}            % 小四, 1.5倍行距
+\newcommand{\dawuhao}{\fontsize{11pt}{11pt}\selectfont}       % 大五号, 单倍行距
+\newcommand{\wuhao}{\fontsize{10.5pt}{15.75pt}\selectfont}    % 五号, 单倍行距
+%-------------------------章节名----------------
+\usepackage{ctexcap} 
+\CTEXsetup[name={,、},number={ \chinese{section}}]{section}
+\CTEXsetup[name={（,）},number={\chinese{subsection}}]{subsection}
+\CTEXsetup[name={,.},number={\arabic{subsubsection}}]{subsubsection}
+%-------------------------页眉页脚--------------
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\lhead{\kaishu \leftmark}
+% \chead{}
+\rhead{\kaishu 大数据计算及应用实验报告}%加粗\bfseries 
+\lfoot{}
+\cfoot{\thepage}
+\rfoot{}
+\usepackage{graphicx}
+ \usepackage{tikz}
+\renewcommand{\headrulewidth}{0.1pt}  
+\renewcommand{\footrulewidth}{0pt}%去掉横线
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}%标题横线
+\newcommand{\HRulegrossa}{\rule{\linewidth}{1.2mm}}
+%-----------------------伪代码------------------
+\usepackage{algorithm}  
+\usepackage{algorithmicx}  
+\usepackage{algpseudocode}  
+\floatname{algorithm}{Algorithm}  
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}  
+\renewcommand{\algorithmicensure}{\textbf{Output:}} 
+\usepackage{lipsum}  
+\makeatletter
+\newenvironment{breakablealgorithm}
+  {% \begin{breakablealgorithm}
+  \begin{center}
+     \refstepcounter{algorithm}% New algorithm
+     \hrule height.8pt depth0pt \kern2pt% \@fs@pre for \@fs@ruled
+     \renewcommand{\caption}[2][\relax]{% Make a new \caption
+      {\raggedright\textbf{\ALG@name~\thealgorithm} ##2\par}%
+      \ifx\relax##1\relax % #1 is \relax
+         \addcontentsline{loa}{algorithm}{\protect\numberline{\thealgorithm}##2}%
+      \else % #1 is not \relax
+         \addcontentsline{loa}{algorithm}{\protect\numberline{\thealgorithm}##1}%
+      \fi
+      \kern2pt\hrule\kern2pt
+     }
+  }{% \end{breakablealgorithm}
+     \kern2pt\hrule\relax% \@fs@post for \@fs@ruled
+  \end{center}
+  }
+\makeatother
+%------------------------代码-------------------
+\usepackage{xcolor} 
+\usepackage{listings} 
+\lstset{ 
+breaklines,%自动换行
+basicstyle=\small,
+escapeinside=``,
+keywordstyle=\color{ blue!70} \bfseries,
+commentstyle=\color{red!50!green!50!blue!50},% 
+stringstyle=\ttfamily,% 
+extendedchars=false,% 
+linewidth=\textwidth,% 
+numbers=left,% 
+numberstyle=\tiny \color{blue!50},% 
+frame=trbl,% 
+rulesepcolor= \color{ red!20!green!20!blue!20},
+showstringspaces=false
+}
+\usepackage{graphicx}
+\definecolor{codebg}{RGB}{248,248,248}
+\definecolor{keywordcolor}{RGB}{0,92,175}
+\definecolor{stringcolor}{RGB}{163,21,21}
+\definecolor{commentcolor}{RGB}{0,128,0}
+\definecolor{numbercolor}{RGB}{120,120,120}
+\definecolor{framecolor}{RGB}{220,220,220}
 
+\lstdefinestyle{pythonstyle}{
+    language=Python,
+    backgroundcolor=\color{codebg},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{keywordcolor}\bfseries,
+    stringstyle=\color{stringcolor},
+    commentstyle=\color{commentcolor}\itshape,
+    numbers=left,
+    numberstyle=\tiny\color{numbercolor},
+    numbersep=8pt,
+    frame=single,
+    rulecolor=\color{framecolor},
+    breaklines=true,
+    breakatwhitespace=false,
+    showstringspaces=false,
+    tabsize=4,
+    keepspaces=true,
+    captionpos=b,
+    xleftmargin=1em,
+    xrightmargin=1em,
+    aboveskip=1em,
+    belowskip=1em
+}
+\lstset{style=pythonstyle}
+\usepackage{wrapfig}
+%------------超链接----------
+\usepackage[colorlinks,linkcolor=black,anchorcolor=blue]{hyperref}
+%------------------------TODO-------------------
+\usepackage{enumitem,amssymb}
+\newlist{todolist}{itemize}{2}
+\setlist[todolist]{label=$\square$}
+% for check symbol 
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+\newcommand{\done}{\rlap{$\square$}{\raisebox{2pt}{\large\hspace{1pt}\cmark}}\hspace{-2.5pt}}
+\newcommand{\wontfix}{\rlap{$\square$}{\large\hspace{1pt}\xmark}}
+%------------------------水印-------------------
+% \usepackage{tikz}
+% \usepackage{xcolor}
+% \usepackage{eso-pic}
+
+% \newcommand{\watermark}[3]{\AddToShipoutPictureBG{
+% \parbox[b][\paperheight]{\paperwidth}{
+% \vfill%
+% \centering%
+% \tikz[remember picture, overlay]%
+%   \node [rotate = #1, scale = #2] at (current page.center)%
+%     {\textcolor{gray!80!cyan!30!magenta!30}{#3}};
+% \vfill}}}
+
+
+
+%———————————————————————————————————————————正文———————————————————————————————————————————————
+%----------------------------------------------
+\begin{document}
+\begin{titlepage}
+    \begin{center}
+    \includegraphics[width=0.8\textwidth]{NKU.png}\\[1cm]    
+    \textsc{\Huge \kaishu{\textbf{南\ \ \ \ \ \ 开\ \ \ \ \ \ 大\ \ \ \ \ \ 学}} }\\[0.9cm]
+    \textsc{\huge \kaishu{\textbf{计\ \ 算\ \ 机\ \ 学\ \ 院}}}\\[0.5cm]
+    \textsc{\Large \textbf{大数据计算及应用实验报告}}\\[0.8cm]
+    \HRule \\[0.9cm]
+    { \LARGE \bfseries 推荐系统大作业报告}\\[0.4cm]
+    \HRule \\[2.0cm]
+    \centering
+    \textsc{\LARGE \kaishu{成员：王斯毅，付家权，彭坤}}\\[0.5cm]
+    \textsc{\LARGE \kaishu{年级\ :\ 2023级}}\\[0.5cm]
+    \textsc{\LARGE \kaishu{专业\ :\ 计算机科学与技术}}\\[0.5cm]
+    \textsc{\LARGE \kaishu{指导教师\ :\ 杨征路}}\\[0.5cm]
+    \vfill
+    {\Large \today}
+    \end{center}
+\end{titlepage}
+%-------------摘------要--------------
+\newpage
+\thispagestyle{empty}
+%----------------------------------------------------------------
+\tableofcontents
+%----------------------------------------------------------------
+\newpage
 \section{实验目的}
 
 推荐系统是解决信息过载问题的核心技术之一，其核心任务是根据用户的历史行为预测其对未交互物品的偏好。本实验以电影评分数据为载体，围绕协同过滤的两大范式——基于模型的方法（矩阵分解）与基于记忆的方法（近邻法）——展开系统性的实现与对比，具体目标如下：
@@ -21,8 +215,9 @@
 
 表~\ref{tab:stats} 汇总了数据集的核心统计指标。
 
-\begin{table}[H]
+\begin{table}[htbp]
     \centering
+    \setlength{\tabcolsep}{36pt}
     \caption{数据集基本统计量}
     \label{tab:stats}
     \begin{tabular}{@{}lr@{}}
@@ -49,7 +244,7 @@
 
 训练集中评分范围为 $[10, 100]$，评分统计量如表~\ref{tab:rating_stats} 所示，每 10 分一档的分布见表~\ref{tab:rating_dist}。
 
-\begin{table}[H]
+\begin{table}[htbp]
     \centering
     \caption{评分统计量}
     \label{tab:rating_stats}
@@ -62,7 +257,7 @@
     \end{tabular}
 \end{table}
 
-\begin{table}[H]
+\begin{table}[htbp]
     \centering
     \caption{评分分布（10 分档）}
     \label{tab:rating_dist}
@@ -83,7 +278,7 @@
 
 \subsection{用户与物品活跃度}
 
-\begin{table}[H]
+\begin{table}[htbp]
     \centering
     \caption{用户与物品的评分数分布}
     \label{tab:activity}
@@ -103,13 +298,310 @@
 
 测试集中有 12 个用户（占 2.0\%）和 647 个物品（占 17.9\%）从未在训练集中出现。对于新用户，模型只能依赖全局均值进行预测；对于新物品，基于物品相似度的 KNN 方法完全失效，而矩阵分解方法可通过偏置项给出合理的基线估计。
 \section{算法描述}
+
+本节依次介绍实验中实现的四种协同过滤算法以及最终的加权融合策略。为便于叙述，首先定义统一的符号体系。
+
+\subsection{符号定义}
+
+设训练集包含 $n$ 条评分记录 $\{(u,i,r_{ui})\}$，全体用户集合记为 $\mathcal{U}$，全体物品集合记为 $\mathcal{I}$。表~\ref{tab:notation} 列出了文中使用的核心符号。
+
+\begin{table}[htbp]
+    \centering
+    \setlength{\tabcolsep}{30pt}
+    \caption{符号定义}
+    \label{tab:notation}
+    \begin{tabular}{@{}cl@{}}
+        \toprule
+        \textbf{符号} & \textbf{含义} \\
+        \midrule
+        $\mu$        & 全局平均评分 \\
+        $b_u$        & 用户 $u$ 的偏置 \\
+        $b_i$        & 物品 $i$ 的偏置 \\
+        $\mathbf{p}_u \in \mathbb{R}^k$ & 用户 $u$ 的 $k$ 维隐向量 \\
+        $\mathbf{q}_i \in \mathbb{R}^k$ & 物品 $i$ 的 $k$ 维隐向量 \\
+        $R(u)$       & 用户 $u$ 评价过的物品集合 \\
+        $\mathcal{N}(i,k)$ & 物品 $i$ 的 $k$ 个最相似邻居 \\
+        $\lambda, \gamma$   & 正则化系数、学习率 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Baseline：带正则化的偏置模型}
+
+偏置模型仅拟合全局均值与用户/物品偏置，不引入隐因子交互。它结构极简、训练快速，常作为推荐系统中实验的下界参考\cite{koren2009matrix}，也是冷启动场景下的可靠回退方案。
+
+\subsubsection{预测公式}
+
+\begin{equation}
+    \hat{r}_{ui} = \mu + b_u + b_i
+    \label{eq:baseline}
+\end{equation}
+
+\subsubsection{优化方法}
+
+参数通过交替最小化带 L2 正则的平方误差求得。对用户偏置 $b_u$ 和物品偏置 $b_i$ 分别令梯度为零，得到闭式更新：
+
+\begin{equation}
+    b_u \leftarrow \frac{\sum_{(i,r) \in R(u)} (r - \mu - b_i)}{\lambda_u + |R(u)|}
+    \label{eq:baseline_bu}
+\end{equation}
+
+\begin{equation}
+    b_i \leftarrow \frac{\sum_{(u,r) \in R(i)} (r - \mu - b_u)}{\lambda_i + |R(i)|}
+    \label{eq:baseline_bi}
+\end{equation}
+
+其中 $\lambda_u$、$\lambda_i$ 分别是用户和物品偏置的正则化系数（代码中记为 \texttt{reg\_user}、\texttt{reg\_item}），较大的 $\lambda$ 将偏置收缩至零。每次迭代交替更新全部 $b_u$ 和 $b_i$，收敛迅速（通常在 10--20 轮内）。
+
+\subsection{FunkSVD：带偏置的矩阵分解}
+
+FunkSVD 由 Simon Funk 在 Netflix Prize 竞赛中提出\cite{funk2006netflix}，核心思想是将评分矩阵分解为低秩的用户/物品隐向量，同时保留偏置项以捕捉评分中的系统性偏移。
+
+\subsubsection{预测公式}
+
+\begin{equation}
+    \hat{r}_{ui} = \mu + b_u + b_i + \mathbf{p}_u^{\!\top} \mathbf{q}_i
+    \label{eq:funk}
+\end{equation}
+
+其中 $\mathbf{p}_u^{\!\top} \mathbf{q}_i$ 刻画了用户偏好与物品属性在 $k$ 维隐空间中的交互强度。
+
+\subsubsection{损失函数与 SGD 更新}
+
+模型通过随机梯度下降（SGD）最小化如下正则化平方误差：
+
+\begin{equation}
+    \mathcal{L} = \sum_{(u,i,r) \in \text{train}} \bigl(r - \hat{r}_{ui}\bigr)^2
+                  + \lambda\Bigl(\sum_u \|\mathbf{p}_u\|^2 + \sum_i \|\mathbf{q}_i\|^2
+                                + \sum_u b_u^2 + \sum_i b_i^2\Bigr)
+    \label{eq:funk_loss}
+\end{equation}
+
+记 $e_{ui} = r_{ui} - \hat{r}_{ui}$ 为单条评分的预测误差，学习率为 $\gamma$，各参数的 SGD 更新规则为：
+
+\begin{align}
+    b_u &\leftarrow b_u + \gamma\,(e_{ui} - \lambda\,b_u) \label{eq:funk_sgd_bu} \\
+    b_i &\leftarrow b_i + \gamma\,(e_{ui} - \lambda\,b_i) \label{eq:funk_sgd_bi} \\
+    \mathbf{p}_u &\leftarrow \mathbf{p}_u + \gamma\,(e_{ui}\,\mathbf{q}_i - \lambda\,\mathbf{p}_u) \label{eq:funk_sgd_pu} \\
+    \mathbf{q}_i &\leftarrow \mathbf{q}_i + \gamma\,(e_{ui}\,\mathbf{p}_u - \lambda\,\mathbf{q}_i) \label{eq:funk_sgd_qi}
+\end{align}
+
+每次迭代遍历全部训练评分并随机打乱，以降低梯度估计的方差。实践中对梯度施加裁剪（阈值 10），对误差施加裁剪（阈值 50），防止评分尺度较大（$10$--$100$）导致的不稳定。学习率按 $\gamma \leftarrow \gamma \times 0.97$ 逐轮衰减。
+
+\subsection{SVD++：融入隐式反馈}
+
+SVD++ 在 FunkSVD 的基础上引入隐式反馈信号：即便不知道用户对某物品的具体评分，仅知道用户评价过该物品这一事实本身就传递了偏好信息\cite{koren2008factorization}。为此，每个物品 $j$ 额外学习一个隐式反馈向量 $\mathbf{y}_j \in \mathbb{R}^k$，用户的表示向量修正为：
+
+\begin{equation}
+    \mathbf{s}_u = \mathbf{p}_u + |R(u)|^{-1/2} \sum_{j \in R(u)} \mathbf{y}_j
+    \label{eq:svdpp_su}
+\end{equation}
+
+预测公式相应变为：
+
+\begin{equation}
+    \hat{r}_{ui} = \mu + b_u + b_i + \mathbf{q}_i^{\!\top} \mathbf{s}_u
+    \label{eq:svdpp}
+\end{equation}
+
+$|R(u)|^{-1/2}$ 归一化确保了不同活跃度用户的隐式贡献量级一致。
+
+\subsubsection{采样 SGD}
+
+传统 SVD++ 在每个训练样本上需更新 $R(u)$ 中所有物品的 $\mathbf{y}_j$，计算复杂度为 $O(|R(u)| \cdot k)$，在人均 152 条评分的数据集上难以承受。本实验采用\textbf{随机采样策略}：每步 SGD 仅从 $R(u)$ 中随机采样 $n_{\text{s}}$ 个物品（默认 20）更新其 $\mathbf{y}_j$。$\mathbf{y}_j$ 的 SGD 更新规则为：
+
+\begin{equation}
+    \mathbf{y}_j \leftarrow \mathbf{y}_j
+    + \gamma\Bigl(e_{ui}\,|R(u)|^{-1/2}\,\mathbf{q}_i - \lambda\,\mathbf{y}_j\Bigr),
+    \quad j \in \text{Sample}(R(u), n_{\text{s}})
+    \label{eq:svdpp_y}
+\end{equation}
+
+为纠正采样引入的累积漂移，每轮结束时从 $\mathbf{Y}$ 矩阵全量重建所有用户的 $\sum\mathbf{y}_j$。这一策略将单轮训练时间从约 200 秒降至约 20 秒，使网格搜索成为可能。
+
+\subsection{Item-KNN：基于物品相似度的近邻预测}
+
+基于物品的 K 近邻协同过滤（Item-KNN）属于基于记忆的方法\cite{sarwar2001itembased}，完全不同于前述矩阵分解范式。它不需要学习隐向量，而是直接从评分历史中计算物品间的相似度，具有良好的可解释性。
+
+\subsubsection{相似度计算}
+
+采用修正余弦相似度（Adjusted Cosine Similarity），先以用户均值中心化评分再计算余弦值，消除用户评分尺度差异：
+
+\begin{equation}
+    \text{sim}(i, j) = \frac{
+        \sum_{u \in \mathcal{U}_{ij}} (r_{ui} - \bar{r}_u)(r_{uj} - \bar{r}_u)
+    }{
+        \sqrt{\sum_{u \in \mathcal{U}_{ij}} (r_{ui} - \bar{r}_u)^2}
+        \sqrt{\sum_{u \in \mathcal{U}_{ij}} (r_{uj} - \bar{r}_u)^2}
+    }
+    \label{eq:knn_sim}
+\end{equation}
+
+其中 $\mathcal{U}_{ij}$ 是同时评价过物品 $i$ 和 $j$ 的用户集合，$\bar{r}_u$ 是用户 $u$ 的评分均值。仅保留共同评分次数 $\geq 3$ 的物品对，每个物品缓存其前 $k$ 个最相似邻居。
+
+\subsubsection{评分预测}
+
+对目标 $(u,i)$，在物品 $i$ 的 $k$ 近邻中筛选用户 $u$ 已评价过的物品，以相似度为权重作加权平均：
+
+\begin{equation}
+    \hat{r}_{ui} = \bar{r}_u + \frac{
+        \sum_{j \in \mathcal{N}(i,k) \cap R(u)} \text{sim}(i,j) \cdot (r_{uj} - \bar{r}_u)
+    }{
+        \sum_{j \in \mathcal{N}(i,k) \cap R(u)} |\text{sim}(i,j)|
+    }
+    \label{eq:knn_pred}
+\end{equation}
+
+仅使用正相似度（$\text{sim} > 0$）的邻居参与加权。若目标物品无有效邻居，退回到用户历史均值或全局均值。
+
+\subsection{加权融合}
+
+单模型各有侧重——矩阵分解泛化强但可解释性差，偏置模型稳定但精度有限。为综合利用各模型的互补信息，采用\textbf{验证集上凸权重搜索}进行融合。
+
+设 $M$ 个基模型在验证集上的原始预测矩阵为 $\mathbf{P} \in \mathbb{R}^{M \times n_{\text{valid}}}$，真实评分向量为 $\mathbf{r}$。在单纯形 $\{\mathbf{w} \mid w_m \ge 0, \sum w_m = 1\}$ 上以步长 0.05 搜索使验证集 RMSE 最小的权重：
+
+\begin{equation}
+    \mathbf{w}^* = \arg\min_{\mathbf{w}} \;
+    \sqrt{\frac{1}{n_{\text{valid}}} \bigl\|
+        \operatorname{clip}\bigl(\mathbf{w}^{\!\top} \mathbf{P}\bigr) - \mathbf{r}
+    \bigr\|^2}
+    \label{eq:ensemble}
+\end{equation}
+
+选出的权重直接用于完整训练集上各模型的最终预测，融合后的评分不再经过模型内部逻辑。最终提交的融合策略为：Baseline (0.20) + FunkSVD (0.65) + SVD++ (0.15)，验证集 RMSE 为 16.52。
+
+\section{关键代码}
+
+本节摘录各算法的核心实现片段，完整代码参见项目仓库中的对应 \texttt{.py} 文件。
+
+\subsection{统一实验协议}
+
+所有模型共享 \texttt{common.py} 中定义的数据加载、验证集划分、指标计算和结果格式化逻辑，保证实验条件一致。其中冷启动回退采用分层策略：优先返回已知用户或物品的经验均值，最后回退到全局均值。
+
+\begin{lstlisting}[caption={分层冷启动回退（\texttt{common.py}）}, label={lst:coldstart}]
+def cold_start_fallback(uid, iid, stats, baseline_model=None):
+    if uid in stats.user_mean and iid not in stats.item_mean:
+        return stats.user_mean[uid]          # 物品未知 → 用户均值
+    if iid in stats.item_mean and uid not in stats.user_mean:
+        return stats.item_mean[iid]          # 用户未知 → 物品均值
+    if baseline_model is not None:           # 模型回退
+        return baseline_model.predict(uid, iid, clip=False)
+    if uid in stats.user_mean:
+        return stats.user_mean[uid]
+    if iid in stats.item_mean:
+        return stats.item_mean[iid]
+    return stats.global_mean                 # 全局均值兜底
+\end{lstlisting}
+
+该函数的优先级链保证了在训练集未覆盖的用户/物品上不会产生无意义的预测值。所有模型在预测阶段和评估阶段统一调用此函数，冷启动行为完全一致。
+
+\subsection{FunkSVD 核心训练循环}
+
+FunkSVD 的训练核心是双层循环：外层遍历 epoch，内层随机打乱样本后用 SGD 更新参数。代码清单~\ref{lst:funk} 展示了单个样本上的参数更新。
+
+\begin{lstlisting}[caption={FunkSVD 单步 SGD 更新（\texttt{funk\_svd.py}）}, label={lst:funk}]
+for u, i, r in train_ratings:
+    pu, qi = self.P[u], self.Q[i]
+    # 前向预测
+    pred = self.global_mean + self.bu[u] + self.bi[i] + np.dot(pu, qi)
+    err = np.clip(r - pred, -50.0, 50.0)    # 误差裁剪
+
+    # 偏置更新
+    self.bu[u] += self.lr * (err - self.reg * self.bu[u])
+    self.bi[i] += self.lr * (err - self.reg * self.bi[i])
+
+    # 隐向量更新（添加梯度裁剪）
+    self.P[u] += self.lr * np.clip(
+        err * qi - self.reg * pu, -10.0, 10.0)
+    self.Q[i] += self.lr * np.clip(
+        err * pu - self.reg * qi, -10.0, 10.0)
+\end{lstlisting}
+
+两个设计细节值得注意：一是误差裁剪（$\pm 50$），将残差限制在合理范围以防止评分尺度较大导致的梯度剧烈波动；二是隐向量梯度裁剪（$\pm 10$），进一步平滑更新方向，提升 SGD 的数值稳定性。
+
+\subsection{SVD++ 采样隐式反馈更新}
+
+SVD++ 最昂贵的部分是更新 $R(u)$ 中所有物品的隐式反馈向量 $\mathbf{y}_j$。本实验采用随机采样策略，每步 SGD 仅选取 $n_s$ 个物品进行更新（默认 $n_s=20$），并通过增量维护 $\sum \mathbf{y}_j$ 避免重复计算。
+
+\begin{lstlisting}[caption={SVD++ 采样式 $\mathbf{y}_j$ 更新（\texttt{svdpp.py}）}, label={lst:svdpp}]
+# 构建用户表示向量（显式 + 隐式）
+implicit = inv_sqrt * self.sum_Y[u]          # |R(u)|^{-1/2} * sum y_j
+user_vec = self.P[u] + implicit
+pred = self.global_mean + self.bu[u] + self.bi[i] + np.dot(qi, user_vec)
+
+# 常规参数更新
+self.bu[u] += self.lr * (err - self.reg * self.bu[u])
+self.bi[i] += self.lr * (err - self.reg * self.bi[i])
+self.P[u] += self.lr * np.clip(err * qi - self.reg * self.P[u], -10, 10)
+self.Q[i] += self.lr * np.clip(err * user_vec - self.reg * qi, -10, 10)
+
+# 采样式 y_j 更新
+ru = self.Ru_indices[u]
+if len(ru):
+    n_sample = min(self.n_samples, len(ru))
+    sampled = rng.choice(ru, size=n_sample, replace=False)
+    old_sampled = self.Y[sampled].copy()
+    grad_y = np.clip(err * inv_sqrt * qi - self.reg * old_sampled, -10, 10)
+    self.Y[sampled] += self.lr * grad_y
+    self.sum_Y[u] += self.Y[sampled].sum(axis=0) - old_sampled.sum(axis=0)
+\end{lstlisting}
+
+每轮结束后调用 \texttt{\_rebuild\_sum\_Y()} 从 $\mathbf{Y}$ 矩阵全量重建 $\sum\mathbf{y}_j$，消除采样累积的数值漂移。这一策略将单轮训练时间从约 $200$ 秒降至约 $20$ 秒，使网格搜索成为可能。
+
+\subsection{Item-KNN 相似度计算}
+
+Item-KNN 不需要迭代训练，其核心是计算物品间的修正余弦相似度。为减少计算量，代码先通过共同评分用户数预筛选候选物品对（阈值 $\text{min\_common}=3$），再计算精确相似度并保留 top-$k$。
+
+\begin{lstlisting}[caption={物品相似度计算与邻居筛选（\texttt{knn\_cf.py}）}, label={lst:knn}]
+for item_i in items:
+    # 通过共同评分用户快速筛选候选
+    candidates = defaultdict(int)
+    for u in self.centered_item_users[item_i]:
+        for item_j in self.user_ratings[u]:
+            if item_j != item_i:
+                candidates[item_j] += 1
+
+    sims = []
+    for item_j, common_count in candidates.items():
+        if common_count < self.min_common:    # 最少共评用户数
+            continue
+        sim = self._adjusted_cosine(item_i, item_j)
+        if sim > 0:                           # 仅保留正相似度
+            sims.append((item_j, sim))
+    sims.sort(key=lambda x: x[1], reverse=True)
+    self.item_sims[item_i] = sims[:self.k]    # 保留 top-k
+\end{lstlisting}
+
+修正余弦相似度先以用户均值中心化评分再计算余弦值，消除了不同用户的评分尺度偏差。只保留正相似度的邻居参与加权预测，避免负相关物品引入噪声。
+
+\subsection{融合权重搜索}
+
+加权融合通过枚举单纯形上的离散网格点来搜索最优凸组合权重，步长为 $0.05$。
+
+\begin{lstlisting}[caption={单纯形权重搜索（\texttt{ensemble.py}）}, label={lst:ensemble}]
+def search_weights(valid_predictions, actual, step=0.05):
+    matrix = np.asarray(valid_predictions, dtype=np.float64)
+    best_rmse, best_weights = float("inf"), None
+
+    for weights in simplex_weights(matrix.shape[0], step):
+        pred = np.dot(weights, matrix)
+        pred = np.clip(pred, MIN_SCORE, MAX_SCORE)
+        rmse = rmse_from_predictions(actual, pred)
+        if rmse < best_rmse:
+            best_rmse = rmse
+            best_weights = weights
+    return best_weights, best_rmse
+\end{lstlisting}
+
+\texttt{simplex\_weights} 是一个递归生成器，枚举所有满足 $\sum w_m = 1,\; w_m \ge 0$ 的离散权重组合。对于 3 模型、步长 0.05 的情况，共需枚举 $C(22,2)=231$ 种组合，计算量几乎可以忽略。
+
 \section{实验设计}
 
 \subsection{总体实验流程}
 
 为保证不同算法之间的比较公平，本实验将数据读取、验证集划分、评价指标、结果输出与结果校验统一封装在 \texttt{common.py} 中。所有模型均使用相同的数据划分和评价方式：先在 \texttt{train.txt} 上按用户分层抽取 10\% 评分作为验证集，每个用户至少保留 1 条评分用于训练；随后在训练子集上进行超参数搜索，以验证集 RMSE 选择最优参数；最后用选定参数在完整 \texttt{train.txt} 上重新训练，并预测 \texttt{test.txt} 中的 9,982 个未知评分。
 
-实验中固定随机种子为 42，以提高结果复现性。所有预测分数在写入结果文件前裁剪到 $[10,100]$，并使用 \texttt{validate\_results.py} 检查输出文件是否覆盖全部测试样本、是否存在重复或缺失、评分范围是否合法以及输出顺序是否与 \texttt{test.txt} 保持一致。
+实验中固定随机种子为 42，以提高结果复现性。所有预测分数在写入结果文件前裁剪到 $[10,100]$，并使用 \texttt{validate\_results.py} 检查输出文件是否覆盖全部测试样本、是否存在重复或缺失、评分范围是否合法以及输出顺序是否与 \texttt{test.txt} 保持一致。除精度指标外，本实验还通过独立脚本 \texttt{measure\_resources.py} 在完整 \texttt{train.txt} 上、按最终选定超参数重新训练各模型，统一测量完整训练时间与模型空间占用，以保证不同算法之间的资源开销比较口径一致。
 
 \begin{table}[H]
     \centering
@@ -123,9 +615,11 @@
         验证集划分 & 按用户分层留出 10\%，每个用户至少保留 1 条训练评分 \\
         评价指标 & RMSE 为主，MAE 作为辅助观察指标 \\
         最终训练 & 选参后使用完整 \texttt{train.txt} 重新训练 \\
+        训练时间口径 & 按最终超参数在完整训练集上单次训练耗时，不含网格搜索 \\
+        空间占用口径 & 训练完成后模型参数/缓存的内存占用；融合模型取参与成员之和 \\
         输出范围 & 所有预测评分裁剪到 $[10,100]$ \\
         结果校验 & 覆盖率、重复项、额外项、评分范围和测试顺序 \\
-        推荐提交 & \texttt{results/ensemble\_result.txt} \\
+        最优提交 & \texttt{results/ensemble\_result.txt} \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -143,7 +637,7 @@
     }.
 \]
 
-RMSE 对较大的预测偏差更加敏感，适合衡量评分预测任务中的整体误差水平。实验过程中还记录 MAE 与训练时间，用于辅助观察模型稳定性和计算开销，但最终模型选择以验证集 RMSE 为准。
+RMSE 对较大的预测偏差更加敏感，适合衡量评分预测任务中的整体误差水平。实验过程中还记录 MAE、完整训练时间与模型空间占用，用于辅助观察模型稳定性与计算开销，但最终模型选择仍以验证集 RMSE 为准。其中，训练时间指最终超参数下在完整训练集上的单次训练耗时；空间占用指训练完成后模型参数或相似度缓存的内存开销。对于加权融合模型，训练时间和空间占用按参与融合的 Baseline、FunkSVD 与 SVD++ 三个成员模型成本之和统计，不包含前期网格搜索与验证集权重搜索的总耗时。
 
 \subsection{模型与超参数设置}
 
@@ -152,6 +646,7 @@ RMSE 对较大的预测偏差更加敏感，适合衡量评分预测任务中的
 \begin{table}[H]
     \centering
     \caption{主要超参数搜索空间}
+        \renewcommand{\arraystretch}{1.2}
     \label{tab:param_space}
     \small
     \begin{tabular}{@{}ll@{}}
@@ -173,35 +668,36 @@ RMSE 对较大的预测偏差更加敏感，适合衡量评分预测任务中的
 
 \subsection{总体性能比较}
 
-表~\ref{tab:model_results} 汇总了各模型在验证集上的 RMSE、最优配置和空间开销估计。可以看到，加权融合模型取得最低 RMSE，为 16.5188；单模型中 FunkSVD 表现最好，RMSE 为 16.6316；Item-KNN 的 RMSE 为 19.3244，明显弱于矩阵分解方法。
+表~\ref{tab:model_results} 汇总了各模型在验证集上的 RMSE、最终完整训练时间和模型空间占用。训练时间与空间开销由独立脚本在完整 \texttt{train.txt} 上按最终选定参数重新训练后测得。可以看到，加权融合模型取得最低 RMSE，为 16.5188；单模型中 FunkSVD 表现最好，RMSE 为 16.6316；Item-KNN 的 RMSE 为 19.3244，明显弱于矩阵分解方法。若同时考虑精度与代价，FunkSVD 是最均衡的单模型，而 SVD++ 与融合模型则分别代表更高精度对应的更高时间成本。
 
 \begin{table}[H]
     \centering
     \caption{各模型验证集结果汇总}
     \label{tab:model_results}
-    \scriptsize
-    \setlength{\tabcolsep}{3pt}
-    \begin{tabular}{@{}p{0.16\textwidth}p{0.11\textwidth}p{0.21\textwidth}p{0.13\textwidth}p{0.21\textwidth}@{}}
+    \small
+    \renewcommand{\arraystretch}{1.2}
+    \setlength{\tabcolsep}{2.5pt}
+    \begin{tabular}{@{}p{0.15\textwidth}p{0.10\textwidth}p{0.13\textwidth}p{0.11\textwidth}p{0.17\textwidth}p{0.18\textwidth}@{}}
         \toprule
-        \textbf{模型} & \textbf{Valid RMSE} & \textbf{完整训练策略} & \textbf{空间估计} & \textbf{结果文件} \\
+        \textbf{模型} & \textbf{Valid RMSE} & \textbf{训练时间} & \textbf{空间占用} & \textbf{完整训练策略} & \textbf{结果文件} \\
         \midrule
-        Weighted Ensemble & \textbf{16.5188} & 成员完整训练后融合 & 约 14.36 MB + Baseline & \texttt{ensemble\_result.txt} \\
-        FunkSVD & 16.6316 & 完整训练 5 epoch & 7.14 MB & \texttt{funk\_svd\_result.txt} \\
-        SVD++ & 16.9001 & 完整训练上限 6 epoch & 7.22 MB & \texttt{svdpp\_result.txt} \\
-        Baseline & 17.2272 & 完整训练 18 epoch & 很小 & \texttt{baseline\_result.txt} \\
-        Item-KNN & 19.3244 & 完整构建相似度缓存 & 4.66 MB & \texttt{knn\_result.txt} \\
+        Weighted Ensemble & \textbf{16.5188} & 3m02s & 15.62 MB & Baseline + FunkSVD + SVD++ 完整训练后融合 & \texttt{ensemble\_result.txt} \\
+        FunkSVD & 16.6316 & 27.2s & 7.38 MB & 完整训练 5 epoch & \texttt{funk\_svd\_result.txt} \\
+        SVD++ & 16.9001 & 2m32s & 7.46 MB & 完整训练上限 6 epoch & \texttt{svdpp\_result.txt} \\
+        Baseline & 17.2272 & 2.8s & 0.78 MB & 完整训练 18 epoch & \texttt{baseline\_result.txt} \\
+        Item-KNN & 19.3244 & 1m26s & 5.10 MB & 完整构建相似度缓存 & \texttt{knn\_result.txt} \\
         \bottomrule
     \end{tabular}
 \end{table}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.82\textwidth]{figures/model_rmse_comparison.pdf}
+    \includegraphics[width=0.95\textwidth]{figures/model_rmse_comparison.png}
     \caption{不同模型的验证集 RMSE 对比}
     \label{fig:model_rmse}
 \end{figure}
 
-图~\ref{fig:model_rmse} 更直观地展示了各模型的性能差异。融合模型相比最强单模型 FunkSVD 进一步降低了 0.1128 的 RMSE，说明不同模型之间存在一定互补性。最终推荐提交文件为 \texttt{results/ensemble\_result.txt}。
+图~\ref{fig:model_rmse} 更直观地展示了各模型的性能差异。融合模型相比最强单模型 FunkSVD 进一步降低了 0.1128 的 RMSE，说明不同模型之间存在一定互补性；但其完整训练时间达到 3 分钟以上，约为 FunkSVD 的 6.7 倍。最终推荐提交文件为 \texttt{results/ensemble\_result.txt}，若强调效率与效果兼顾，则 FunkSVD 是更均衡的选择。
 
 \subsection{最优参数与融合权重}
 
@@ -227,22 +723,22 @@ RMSE 对较大的预测偏差更加敏感，适合衡量评分预测任务中的
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.70\textwidth]{figures/ensemble_weights.pdf}
+    \includegraphics[width=0.95\textwidth]{figures/ensemble_weights.png}
     \caption{加权融合模型的最优权重}
     \label{fig:ensemble_weights}
 \end{figure}
 
 由图~\ref{fig:ensemble_weights} 可见，融合模型主要依赖 FunkSVD（权重 0.65），同时引入 Baseline 的稳定偏置估计（权重 0.20）和 SVD++ 的少量隐式反馈信息（权重 0.15）。Item-KNN 在验证集上误差较大，因此默认不纳入最终融合。
 
-\subsection{超参数搜索结果}
+\subsection{超参数搜索结果与资源代价}
 
-表~\ref{tab:grid_search} 展示了主要模型的关键搜索记录。FunkSVD 中，增大隐因子维度到 100 并适当提高正则化到 0.12 后取得最优；Baseline 对正则参数不太敏感，但较小的用户正则和物品正则组合效果最好；KNN 随近邻数增大而改善，说明更大的邻域能缓解部分稀疏性，但总体仍受限于物品共现不足。
+表~\ref{tab:grid_search} 展示了主要模型的关键搜索记录。FunkSVD 中，增大隐因子维度到 100 并适当提高正则化到 0.12 后取得最优；Baseline 对正则参数不太敏感，但较小的用户正则和物品正则组合效果最好；KNN 随近邻数增大而改善，说明更大的邻域能缓解部分稀疏性，但总体仍受限于物品共现不足。从资源角度看，Baseline 的训练时间仅 2.8 秒、空间占用仅 0.78 MB，是成本最低的方法；SVD++ 虽然精度优于 Baseline，但完整训练时间达到 2 分 32 秒，是时间开销最大的单模型；Item-KNN 的空间占用仅 5.10 MB，但由于需要构建相似度缓存，训练时间仍达到 1 分 26 秒。
 
 \begin{table}[H]
     \centering
     \caption{关键超参数搜索记录}
     \label{tab:grid_search}
-    \footnotesize
+    \small
     \setlength{\tabcolsep}{3pt}
     \begin{tabular}{@{}p{0.14\textwidth}p{0.48\textwidth}p{0.20\textwidth}@{}}
         \toprule
@@ -265,7 +761,7 @@ RMSE 对较大的预测偏差更加敏感，适合衡量评分预测任务中的
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.82\textwidth]{figures/rating_distribution.pdf}
+    \includegraphics[width=0.82\textwidth]{figures/rating_distribution.png}
     \caption{训练集评分分布}
     \label{fig:rating_distribution}
 \end{figure}
@@ -276,22 +772,44 @@ RMSE 对较大的预测偏差更加敏感，适合衡量评分预测任务中的
 
 \subsection{各模型表现分析}
 
-Baseline 的 RMSE 为 17.2272，说明全局均值、用户偏置和物品偏置已经捕捉了相当一部分评分规律。这一结果也解释了为什么融合模型中 Baseline 仍有 0.20 的权重：它虽然表达能力有限，但对冷启动和长尾物品更加稳健。
+Baseline 的 RMSE 为 17.2272，说明全局均值、用户偏置和物品偏置已经捕捉了相当一部分评分规律。这一结果也解释了为什么融合模型中 Baseline 仍有 0.20 的权重：它虽然表达能力有限，但对冷启动和长尾物品更加稳健。与此同时，Baseline 的完整训练仅需 2.8 秒、空间占用仅 0.78 MB，是所有方法中最轻量的模型，因此非常适合作为回退模型和融合成员。
 
-FunkSVD 是表现最好的单模型。其优势在于模型结构相对简洁，参数量可控，能够同时学习用户兴趣和物品属性的隐因子表示。在本实验中，$k=100$、正则 0.12 的组合取得最优结果，说明适当增加隐因子维度有助于提升表达能力，但仍需要较强正则化抑制过拟合。
+FunkSVD 是表现最好的单模型。其优势在于模型结构相对简洁，参数量可控，能够同时学习用户兴趣和物品属性的隐因子表示。在本实验中，$k=100$、正则 0.12 的组合取得最优结果，说明适当增加隐因子维度有助于提升表达能力，但仍需要较强正则化抑制过拟合。从资源上看，FunkSVD 的完整训练时间为 27.2 秒、空间占用为 7.38 MB，明显快于 SVD++ 和 Item-KNN，同时精度最优，因此是精度与代价之间最均衡的单模型。
 
-SVD++ 在 FunkSVD 基础上加入隐式反馈向量，理论上可以利用用户评价过的所有物品来补充偏好信息。但在本数据集中，大量物品极为长尾，隐式反馈参数会显著增加模型复杂度，训练后期容易震荡。因此代码中对完整训练阶段设置 6 轮上限，保留较稳定的预测状态。其验证 RMSE 为 16.9001，优于 Baseline，但弱于 FunkSVD。
+SVD++ 在 FunkSVD 基础上加入隐式反馈向量，理论上可以利用用户评价过的所有物品来补充偏好信息。但在本数据集中，大量物品极为长尾，隐式反馈参数会显著增加模型复杂度，训练后期容易震荡。因此代码中对完整训练阶段设置 6 轮上限，保留较稳定的预测状态。其验证 RMSE 为 16.9001，优于 Baseline，但弱于 FunkSVD。资源统计也反映了这一点：SVD++ 的空间占用为 7.46 MB，与 FunkSVD 接近，但训练时间达到 2 分 32 秒，远高于 FunkSVD 的 27.2 秒，说明其主要成本压力来自训练过程而非参数规模。
 
-Item-KNN 的可解释性较强，可以通过相似物品给出直观推荐依据，但它高度依赖共现统计。在本数据集中，物品端长尾严重，大量物品共同评分用户不足，导致相似度估计不可靠；此外，测试集中包含 647 个训练集中未出现的新物品，这些样本对 KNN 尤其不利。
+Item-KNN 的可解释性较强，可以通过相似物品给出直观推荐依据，但它高度依赖共现统计。在本数据集中，物品端长尾严重，大量物品共同评分用户不足，导致相似度估计不可靠；此外，测试集中包含 647 个训练集中未出现的新物品，这些样本对 KNN 尤其不利。虽然 Item-KNN 的空间占用只有 5.10 MB，低于矩阵分解模型，但构建相似度缓存仍需要 1 分 26 秒，且精度明显落后，因此综合性价比并不高。
 
 \subsection{融合模型的提升原因}
 
-加权融合取得最低 RMSE（16.5188），主要原因是不同模型的误差具有互补性。FunkSVD 提供最强的主体预测能力；Baseline 提供稳定的用户和物品偏置，在冷启动、长尾物品和极端预测上更稳；SVD++ 虽然单独表现不如 FunkSVD，但其隐式反馈项仍能提供部分额外信息。通过验证集搜索得到的权重分配符合这一观察：FunkSVD 占主导，Baseline 和 SVD++ 作为辅助修正。
+加权融合取得最低 RMSE（16.5188），验证了不同范式模型之间存在互补的误差模式。具体而言：
 
-从实验角度看，融合带来的提升并不依赖复杂模型，而是来自稳定的实验流程：固定随机种子、统一验证集、先选参再完整训练、输出裁剪和结果校验。这些步骤减少了偶然性和格式错误，使模型比较更可信。
+\begin{itemize}
+    \item FunkSVD（权重 0.65）提供最强的主体预测能力，在大部分常规样本上表现最优；
+    \item Baseline（权重 0.20）对冷启动用户和长尾物品更加稳健——其偏置估计不依赖交互密度，在稀疏区域的预测方差较低；
+    \item SVD++（权重 0.15）贡献了少量来自隐式反馈的信息，虽然单独表现不如 FunkSVD，但包含不同来源的误差，加权后仍能带来边际提升。
+\end{itemize}
+
+从资源代价看，融合模型的最终训练时间为 3 分 02 秒、空间占用为 15.62 MB，本质上接近其成员模型成本之和，因此它更适合作为最终提交方案，而非最低成本方案。从实验角度看，融合带来的提升并不依赖复杂模型，而是来自稳定的实验流程：固定随机种子、统一验证集、先选参再完整训练、输出裁剪和结果校验。这些步骤减少了偶然性和格式错误，使模型比较更可信。
 
 \subsection{局限性与改进方向}
 
-本实验仍存在若干局限。首先，当前只使用一次固定验证集划分，虽然可复现，但不能完全反映不同划分下的波动；后续可以采用多次随机划分或交叉验证估计结果方差。其次，融合权重仅以 0.05 为步长搜索，粒度较粗，可以进一步使用连续优化或按用户活跃度、物品热度分组学习不同权重。最后，当前冷启动策略只基于均值和偏置，没有利用电影内容、标签或时间信息；如果能够引入物品属性或用户侧特征，冷启动样本的预测仍有提升空间。
+本实验存在以下几方面局限，值得进一步探索：
 
-总体而言，在该高稀疏电影评分数据集上，矩阵分解方法明显优于邻域方法；在稳健偏置模型和隐式反馈模型的辅助下，简单加权融合进一步提升了预测精度，因此最终选择 \texttt{results/ensemble\_result.txt} 作为提交结果。
+\begin{enumerate}
+    \item \textbf{验证策略}：当前仅使用一次固定验证集划分（seed=42），虽然保证了可复现性，但无法反映不同划分下的方差。后续可采用 5 折交叉验证，报告 RMSE 的均值和标准差，为模型比较提供统计显著性依据。
+
+    \item \textbf{融合方法}：当前以 0.05 为步长在单纯形上搜索，粒度较粗，且所有样本共享同一组权重。改进方向包括：（a）使用更细步长或连续优化（如基于验证集 RMSE 的梯度下降）；（b）按用户活跃度或物品热度分组学习差异化权重。
+
+    \item \textbf{冷启动处理}：当前分层回退策略只依赖评分均值和偏置，未利用任何内容信息。如果能够引入电影的类型、导演、年份等元数据，以及用户的注册时间、地理位置等属性，冷启动样本的预测精度有较大提升空间。
+
+    \item \textbf{时间动态}：用户偏好会随时间漂移，电影的流行度也会随上映时间衰减。当前所有模型忽略了时间维度，将不同时期的评分等同处理。引入时间衰减因子或时序矩阵分解模型（如 TimeSVD++）可能是进一步提升的方向。
+\end{enumerate}
+
+总体而言，在本次高稀疏电影评分预测任务中，矩阵分解方法显著优于邻域方法；通过稳定的偏置模型和隐式反馈模型作为辅助，简单的验证集加权融合即可进一步降低预测误差。因此最终选择 \texttt{results/ensemble\_result.txt} 作为提交结果。
+
+
+\newpage
+\bibliographystyle{plain}
+\bibliography{references}
+\end{document}

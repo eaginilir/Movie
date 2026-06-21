@@ -1,0 +1,7 @@
+Model                 Train Time     Wall Time        Memory
+------------------------------------------------------------
+Weighted Ensemble           3m2s          3m2s      15.62 MB
+Baseline                    2.8s          2.8s       0.78 MB
+FunkSVD                    27.2s         27.2s       7.38 MB
+SVD++                      2m32s         2m32s       7.46 MB
+Item-KNN                   1m26s         1m26s       5.10 MB

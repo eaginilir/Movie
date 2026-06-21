@@ -269,11 +269,15 @@ def run_experiment(seed: int = DEFAULT_SEED):
 
     predictions = final_model.predict_batch(test_pairs)
     result_path = write_predictions("funk_svd_result.txt", test_pairs, predictions)
+    print(f"Final train time: {final_model.train_time:.1f}s")
+    print(f"Final model memory: {final_model.memory_mb():.2f} MB")
     print(f"Result saved to {result_path}")
     return {
         "model": final_model,
         "best_rmse": best_rmse,
         "best_params": best_params,
+        "train_time": final_model.train_time,
+        "memory_mb": final_model.memory_mb(),
         "result_path": result_path,
     }
 

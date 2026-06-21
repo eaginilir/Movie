@@ -13,6 +13,7 @@ from __future__ import annotations
 import math
 import os
 import random
+import sys
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
@@ -285,6 +286,19 @@ def validate_result_file(result_path: str, test_pairs: Optional[Sequence[Pair]] 
 
 def memory_mb_for_arrays(arrays: Iterable[np.ndarray]) -> float:
     return sum(arr.nbytes for arr in arrays if arr is not None) / (1024 * 1024)
+
+
+def memory_mb_for_mapping(mapping: Dict[object, object]) -> float:
+    """Coarse memory estimate for Python dict-backed model parameters."""
+    total = sys.getsizeof(mapping)
+    for key, value in mapping.items():
+        total += sys.getsizeof(key)
+        total += sys.getsizeof(value)
+    return total / (1024 * 1024)
+
+
+def format_memory_mb(memory_mb: float) -> str:
+    return f"{memory_mb:.2f} MB"
 
 
 def append_summary(section: str) -> None:
