@@ -4,3 +4,4 @@ __pycache__/
 .env
 *.log
 .DS_Store
+任务二/track2/student/diagnose.py
